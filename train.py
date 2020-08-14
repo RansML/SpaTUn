@@ -142,7 +142,8 @@ def read_frame_velocity(framei, fn_train, cell_max_min):
 
     # print("g:", g)
 
-    g = torch.tensor(g, dtype=torch.double)
+    # g = torch.tensor(g, dtype=torch.double)
+    g = torch.tensor(g, dtype=torch.float32)
     X = g[:, :3]
 
     # print("X:", X)
@@ -585,13 +586,32 @@ def query_regression(cell_max_min, X, y_occupancy, g, framei):
 def query_velocity(X, y_vx, y_vy, y_vz, partitions, cell_resolution, cell_max_min, framei):
     bhm_velocity_mdl = load_mdl('velocity/{}_f{}'.format(args.save_model_path, framei), 'BHM_VELOCITY_PYTORCH')
     print("Querying velocity BHM ...")
+    #
+    # print("(query) X.shape:", X.shape)
 
-    print("(query) X.shape:", X.shape)
 
 
+    # # query the model
+    # xx, yy, zz = torch.meshgrid(
+    #     torch.arange(
+    #         cell_max_min[0],
+    #         cell_max_min[1]+args.q_resolution[0],
+    #         args.q_resolution[0]
+    #     ),
+    #     torch.arange(
+    #         cell_max_min[2],
+    #         cell_max_min[3]+args.q_resolution[1],
+    #         args.q_resolution[1]
+    #     ),
+    #     torch.arange(
+    #         cell_max_min[4],
+    #         cell_max_min[5]+args.q_resolution[2],
+    #         args.q_resolution[2]
+    #     )
+    # )
+    # Xq_mv = torch.stack([xx.flatten(), yy.flatten(), zz.flatten()], dim=1)
 
-    # query the model
-    xx, yy, zz = torch.meshgrid(
+    xx, yy = torch.meshgrid(
         torch.arange(
             cell_max_min[0],
             cell_max_min[1]+args.q_resolution[0],
@@ -602,12 +622,8 @@ def query_velocity(X, y_vx, y_vy, y_vz, partitions, cell_resolution, cell_max_mi
             cell_max_min[3]+args.q_resolution[1],
             args.q_resolution[1]
         ),
-        torch.arange(
-            cell_max_min[4],
-            cell_max_min[5]+args.q_resolution[2],
-            args.q_resolution[2]
-        )
     )
+    Xq_mv = torch.stack([xx.flatten(), yy.flatten()], dim=1)
 
     # xx, yy, zz = torch.meshgrid(
     #     torch.arange(segi[0], segi[1], args.q_resolution[0]),
@@ -616,7 +632,7 @@ def query_velocity(X, y_vx, y_vy, y_vz, partitions, cell_resolution, cell_max_mi
     # )
     # Xq = torch.stack([xx.flatten(), yy.flatten(), zz.flatten()], dim=1)
 
-    Xq_mv = torch.stack([xx.flatten(), yy.flatten(), zz.flatten()], dim=1)
+
     time1 = time.time()
 
     if args.likelihood_type == "gamma":

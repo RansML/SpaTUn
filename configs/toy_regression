@@ -4,6 +4,7 @@
   "surface_threshold": 0.05,
   "num_frames": 1,
   "model_type": "regression",
+  "likelihood_type":"gaussian",
   "config": "",
   "save_config": "./toy_regression",
   "q_resolution": [
