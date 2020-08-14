@@ -4,7 +4,7 @@
   "surface_threshold": 10,
   "num_frames": 1,
   "model_type": "velocity",
-  "likelihood_type":"gamma",
+  "likelihood_type":"gaussian",
   "config": "",
   "save_config": "./velocity1",
   "q_resolution": [

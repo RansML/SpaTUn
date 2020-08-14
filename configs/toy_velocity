@@ -1,10 +1,10 @@
 {
   "dataset_path": "./datasets/toy_velocity/toy_velocity_1",
   "plot_title": "toy_velocity",
-  "surface_threshold": 0.5,
+  "surface_threshold": 10,
   "num_frames": 1,
   "model_type": "velocity",
-  "likelihood_type":"gamma",
+  "likelihood_type":"gaussian",
   "config": "",
   "save_config": "./toy_velocity",
   "q_resolution": [

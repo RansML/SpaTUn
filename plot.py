@@ -419,6 +419,9 @@ class BHM_PLOTTER():
         @param toPlot: array of (Xq, yq, vars) (3D location and occupancy prediction)
         @param fig: plotly fig
         """
+
+        print("{}, {}: {}".format(row, col, surface_threshold))
+
         Xqs = torch.zeros((1,3))
         yqs = torch.ones(1)
         # vars = torch.zeros(1)
@@ -513,8 +516,6 @@ class BHM_PLOTTER():
 
         fig.update_layout(coloraxis={'colorscale':'Jet', "cmin":min_c, "cmax":max_c})
 
-
-
         self.plot_velocity_stuff(zip(X.float(), y_vx), fig, None, 1, 1)
         self.plot_velocity_stuff(zip(X.float(), y_vy), fig,  None, 1, 2)
         self.plot_velocity_stuff(zip(X.float(), y_vz), fig, None, 1, 3)
@@ -522,9 +523,10 @@ class BHM_PLOTTER():
         # self.plot_velocity_stuff(zip(Xq_mv.float(), mean_x.float()), fig, 15, 2, 1)
         # self.plot_velocity_stuff(zip(Xq_mv.float(), mean_y.float()), fig, 15, 2, 2)
         # self.plot_velocity_stuff(zip(Xq_mv.float(), mean_z.float()), fig, None, 2, 3)
-        self.plot_velocity_stuff(zip(Xq_mv.float(), mean_x.float()), fig, None, 2, 1)
-        self.plot_velocity_stuff(zip(Xq_mv.float(), mean_y.float()), fig, 1.5, 2, 2)
-        self.plot_velocity_stuff(zip(Xq_mv.float(), mean_z.float()), fig, None, 2, 3)
+        self.plot_velocity_stuff(zip(Xq_mv.float(), mean_x.float()), fig, None if torch.all(mean_x == 0) else self.surface_threshold, 2, 1)
+        self.plot_velocity_stuff(zip(Xq_mv.float(), mean_y.float()), fig, None if torch.all(mean_y == 0) else self.surface_threshold, 2, 2)
+        self.plot_velocity_stuff(zip(Xq_mv.float(), mean_z.float()), fig, None if torch.all(mean_z == 0) else self.surface_threshold, 2, 3)
+        # self.plot_velocity_stuff(zip(X.float(), y_vx), fig, None if torch.all(y_vx == 0) else self.surface_threshold, 1, 1)
 
         print("mean_x:", mean_x)
         print("mean_y:", mean_y)
