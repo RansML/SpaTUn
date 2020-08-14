@@ -379,7 +379,7 @@ class BHM_PLOTTER():
             os.makedirs("./plots/regression")
         ###///###
 
-        plotly.offline.plot(fig, filename=os.path.abspath('./plots/regression/{}_frame{}.html'.format(self.plot_title, i)), auto_open=True)
+        plotly.offline.plot(fig, filename=os.path.abspath('./plots/regression/{}_frame{}.html'.format(self.plot_title, i)), auto_open=False)#True)
         print('Completed plotting in %2f s' % (time.time()-time1))
 
     def filter_predictions_velocity(self, ploti, surface_threshold):
@@ -440,6 +440,7 @@ class BHM_PLOTTER():
         colorbar_len = 1
         colorbar_y = 0.5
 
+
         fig.add_trace(
             go.Scatter3d(
                 x=Xqs[1:,0],
@@ -448,14 +449,7 @@ class BHM_PLOTTER():
                 mode='markers',
                 marker=dict(
                     color=yqs,
-                    colorscale = "Jet",
-                    cmax=yqs.max().item(),
-                    cmin=yqs.min().item(),
-                    colorbar=dict(
-                        x=0.65,
-                        len=colorbar_len,
-                        y=colorbar_y
-                    ),
+                    coloraxis="coloraxis",
                     opacity=0.1,
                     symbol='square',
                 ),
@@ -464,7 +458,31 @@ class BHM_PLOTTER():
             col=col
         )
 
-    def plot_velocity_frame(self, X, Xq_mv, mean_x, mean_y, mean_z, i):
+        # fig.add_trace(
+        #     go.Scatter3d(
+        #         x=Xqs[1:,0],
+        #         y=Xqs[1:,1],
+        #         z=Xqs[1:,2],
+        #         mode='markers',
+        #         marker=dict(
+        #             color=yqs,
+        #             colorscale = "Jet",
+        #             cmax=yqs.max().item(),
+        #             cmin=yqs.min().item(),
+        #             colorbar=dict(
+        #                 x=0.65,
+        #                 len=colorbar_len,
+        #                 y=colorbar_y
+        #             ),
+        #             opacity=0.1,
+        #             symbol='square',
+        #         ),
+        #     ),
+        #     row=row,
+        #     col=col
+        # )
+
+    def plot_velocity_frame(self, X, y_vx, y_vy, y_vz, Xq_mv, mean_x, mean_y, mean_z, i):
         time1 = time.time()
         # specs = [[{"type": "scene"}, {"type": "scene"}, {"type": "scene"}]]
         specs = [[{"type": "scene"}, {"type": "scene"}, {"type": "scene"}],
@@ -483,26 +501,30 @@ class BHM_PLOTTER():
 
         print("Xq_mv.shape:", Xq_mv.shape)
         print("X.shape:", X.shape)
-
+        #
         print("mean_x.shape:", mean_x.shape)
-        print("X[:, 0].shape:", X[:, 0].shape)
+        # print("X[:, 0].shape:", X[:, 0].shape)
+
+        print("y_vx.shape:", y_vx.shape)
+        # exit()
+
+        min_c = min(mean_x.min().item(), mean_y.min().item(), mean_z.min().item(), y_vx.min().item(), y_vy.min().item(), y_vz.min().item())
+        max_c = max(mean_x.max().item(), mean_y.max().item(), mean_z.max().item(), y_vx.max().item(), y_vy.max().item(), y_vz.max().item())
+
+        fig.update_layout(coloraxis={'colorscale':'Jet', "cmin":min_c, "cmax":max_c})
 
 
 
-        self.plot_velocity_stuff(zip(X.float(), X[:, 0].unsqueeze(-1).float()), fig, None, 1, 1)
-        self.plot_velocity_stuff(zip(X.float(), X[:, 1].unsqueeze(-1).float()), fig,  None, 1, 2)
-        self.plot_velocity_stuff(zip(X.float(), X[:, 2].unsqueeze(-1).float()), fig, None, 1, 3)
-        # self.plot_velocity_stuff(zip(X.float(), X[:, 0].unsqueeze(-1).float()), fig, -float("inf"), 1, 1)
-        # self.plot_velocity_stuff(zip(X.float(), X[:, 1].unsqueeze(-1).float()), fig,  -float("inf"), 1, 2)
-        # self.plot_velocity_stuff(zip(X.float(), X[:, 2].unsqueeze(-1).float()), fig, -float("inf"), 1, 3)
+        self.plot_velocity_stuff(zip(X.float(), y_vx), fig, None, 1, 1)
+        self.plot_velocity_stuff(zip(X.float(), y_vy), fig,  None, 1, 2)
+        self.plot_velocity_stuff(zip(X.float(), y_vz), fig, None, 1, 3)
 
-        self.plot_velocity_stuff(zip(Xq_mv.float(), mean_x.float()), fig, 15, 2, 1)
-        self.plot_velocity_stuff(zip(Xq_mv.float(), mean_y.float()), fig, 15, 2, 2)
-        self.plot_velocity_stuff(zip(Xq_mv.float(), mean_z.float()), fig, 15, 2, 3)
-
-        # self.plot_velocity_stuff(zip(Xq_mv.float(), mean_x.float()), fig, 10, 2, 1)
-        # self.plot_velocity_stuff(zip(Xq_mv.float(), mean_y.float()), fig, 10, 2, 2)
-        # self.plot_velocity_stuff(zip(Xq_mv.float(), mean_z.float()), fig, 10, 2, 3)
+        # self.plot_velocity_stuff(zip(Xq_mv.float(), mean_x.float()), fig, 15, 2, 1)
+        # self.plot_velocity_stuff(zip(Xq_mv.float(), mean_y.float()), fig, 15, 2, 2)
+        # self.plot_velocity_stuff(zip(Xq_mv.float(), mean_z.float()), fig, None, 2, 3)
+        self.plot_velocity_stuff(zip(Xq_mv.float(), mean_x.float()), fig, None, 2, 1)
+        self.plot_velocity_stuff(zip(Xq_mv.float(), mean_y.float()), fig, 1.5, 2, 2)
+        self.plot_velocity_stuff(zip(Xq_mv.float(), mean_z.float()), fig, None, 2, 3)
 
         print("mean_x:", mean_x)
         print("mean_y:", mean_y)
@@ -564,5 +586,5 @@ class BHM_PLOTTER():
                                      aspectratio=dict(x=2, y=2, z=1)),)
 
         fig.update_layout(title='{}_occupancy_frame{}'.format(self.plot_title, i), height=800)
-        plotly.offline.plot(fig, filename=os.path.abspath('./plots/velocity/{}_frame{}.html'.format(self.plot_title, i)), auto_open=True)
+        plotly.offline.plot(fig, filename=os.path.abspath('./plots/velocity/{}_frame{}.html'.format(self.plot_title, i)), auto_open=False)#True)
         print('Completed plotting in %2f s' % (time.time()-time1))

@@ -170,7 +170,7 @@ def read_frame_velocity(framei, fn_train, cell_max_min):
     if cell_max_min[5] == None:
         cell_max_min[5] = X[:,2].max()
 
-    print("(read) X.shape:", X.shape)
+    # print("(read) X.shape:", X.shape)
 
     cell_max_min_segments = get3DPartitions(tuple(cell_max_min), args.num_partitions[0], args.num_partitions[1], args.num_partitions[2])
     return X, y_vx, y_vy, y_vz, cell_max_min_segments
@@ -355,8 +355,8 @@ def train(fn_train, cell_max_min, cell_resolution):
             train_regression(alpha, beta, cell_resolution, cell_max_min, X, y_occupancy, g, sigma[:,:2], framei)
             # For regression, we use sigma dimension 2. This is hard coded in the pass to plot_regression for the sigma term above
         elif args.model_type == "velocity": ###===###
-            print("X:", X)
-            print("partitions:", partitions)
+            # print("X:", X)
+            # print("partitions:", partitions)
             train_velocity(alpha, beta, X, y_vx, y_vy, y_vz, partitions, cell_resolution, cell_max_min, framei) ###///###
 
 
@@ -592,26 +592,7 @@ def query_velocity(X, y_vx, y_vy, y_vz, partitions, cell_resolution, cell_max_mi
 
 
     # # query the model
-    # xx, yy, zz = torch.meshgrid(
-    #     torch.arange(
-    #         cell_max_min[0],
-    #         cell_max_min[1]+args.q_resolution[0],
-    #         args.q_resolution[0]
-    #     ),
-    #     torch.arange(
-    #         cell_max_min[2],
-    #         cell_max_min[3]+args.q_resolution[1],
-    #         args.q_resolution[1]
-    #     ),
-    #     torch.arange(
-    #         cell_max_min[4],
-    #         cell_max_min[5]+args.q_resolution[2],
-    #         args.q_resolution[2]
-    #     )
-    # )
-    # Xq_mv = torch.stack([xx.flatten(), yy.flatten(), zz.flatten()], dim=1)
-
-    xx, yy = torch.meshgrid(
+    xx, yy, zz = torch.meshgrid(
         torch.arange(
             cell_max_min[0],
             cell_max_min[1]+args.q_resolution[0],
@@ -622,8 +603,27 @@ def query_velocity(X, y_vx, y_vy, y_vz, partitions, cell_resolution, cell_max_mi
             cell_max_min[3]+args.q_resolution[1],
             args.q_resolution[1]
         ),
+        torch.arange(
+            cell_max_min[4],
+            cell_max_min[5]+args.q_resolution[2],
+            args.q_resolution[2]
+        )
     )
-    Xq_mv = torch.stack([xx.flatten(), yy.flatten()], dim=1)
+    Xq_mv = torch.stack([xx.flatten(), yy.flatten(), zz.flatten()], dim=1)
+
+    # xx, yy = torch.meshgrid(
+    #     torch.arange(
+    #         cell_max_min[0],
+    #         cell_max_min[1]+args.q_resolution[0],
+    #         args.q_resolution[0]
+    #     ),
+    #     torch.arange(
+    #         cell_max_min[2],
+    #         cell_max_min[3]+args.q_resolution[1],
+    #         args.q_resolution[1]
+    #     ),
+    # )
+    # Xq_mv = torch.stack([xx.flatten(), yy.flatten()], dim=1)
 
     # xx, yy, zz = torch.meshgrid(
     #     torch.arange(segi[0], segi[1], args.q_resolution[0]),
@@ -650,7 +650,7 @@ def query_velocity(X, y_vx, y_vy, y_vz, partitions, cell_resolution, cell_max_mi
     # meanVarPlot = [Xq_mv, mean_x, mean_y, mean_z]
     # print("Before save query data")
     # save_query_data((meanVarPlot, X, framei, cell_max_min), 'velocity/{}_f{}'.format(args.save_query_data_path, framei))
-    save_query_data((X, Xq_mv, mean_x, mean_y, mean_z, framei), 'velocity/{}_f{}'.format(args.save_query_data_path, framei))
+    save_query_data((X, y_vx, y_vy, y_vz, Xq_mv, mean_x, mean_y, mean_z, framei), 'velocity/{}_f{}'.format(args.save_query_data_path, framei))
     # print("Done querying.")
 # ==============================================================================
 # Plot
@@ -672,10 +672,10 @@ def plot():
             meanVarPlot, filtered, framei, cell_max_min = load_query_data('regression/{}_f{}'.format(args.save_query_data_path, framei))
             plotter.plot_regression_frame(meanVarPlot, filtered, framei, cell_max_min)
         elif args.model_type == "velocity": ###===###
-            X, Xq_mv, mean_x, mean_y, mean_z, framei = load_query_data('velocity/{}_f{}'.format(args.save_query_data_path, framei))
+            X, y_vx, y_vy, y_vz, Xq_mv, mean_x, mean_y, mean_z, framei = load_query_data('velocity/{}_f{}'.format(args.save_query_data_path, framei))
             print("(plot) X.shape:", X.shape)
             # exit()
-            plotter.plot_velocity_frame(X, Xq_mv, mean_x, mean_y, mean_z, framei)
+            plotter.plot_velocity_frame(X, y_vx, y_vy, y_vz, Xq_mv, mean_x, mean_y, mean_z, framei)
 
 
 
@@ -746,3 +746,5 @@ if __name__ == '__main__':
         query(fn_train, cell_max_min)
     if args.mode == 'tqp' or args.mode == 'po':
         plot()
+
+    print("Complete.")

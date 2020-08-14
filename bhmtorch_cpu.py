@@ -367,6 +367,11 @@ class BHM_VELOCITY_PYTORCH:
 
         # print("X:", X)
 
+        X = X.double()
+        y_vx = y_vx.double()
+        y_vy = y_vy.double()
+        y_vz = y_vz.double()
+
         X_ = X.cpu().detach().numpy()
         y_vx_ = np.log(y_vx + eps)
         y_vy_ = np.log(y_vy + eps)
@@ -418,8 +423,8 @@ class BHM_VELOCITY_PYTORCH:
 
         print("X.shape:", X.shape)
         print("self.grid.shape:", self.grid.shape)
-        X = X[:, :2]
-        self.grid = self.grid[:, :2]
+        # X = X[:, :2]
+        # self.grid = self.grid[:, :2]
         print("X.shape:", X.shape)
         print("self.grid.shape:", self.grid.shape)
         X = self.__sparse_features(X, self.rbf_kernel_type)
@@ -468,7 +473,7 @@ class BHM_VELOCITY_PYTORCH:
         print("self.mu_x.shape:", self.mu_x.shape)
         print("self.mu_x.reshape(-1, 1).shape:", self.mu_x.reshape(-1, 1).shape)
 
-        mu_a_x = Xq.mm(self.mu_x.reshape(-1, 1)).squeeze()
+        mu_a_x = Xq.mm(self.mu_x.reshape(-1, 1))#.squeeze()
 
         print("Here1")
         print("mu_a_x.shape:", mu_a_x.shape)
@@ -479,17 +484,14 @@ class BHM_VELOCITY_PYTORCH:
 
         sig2_inv_a_x = 1/self.beta + Xq.mm(self.sig_x).mm(Xq.t())
 
-
-
-
         print("Here2")
 
-        mu_a_y = Xq.mm(self.mu_y.reshape(-1, 1)).squeeze()
+        mu_a_y = Xq.mm(self.mu_y.reshape(-1, 1))#.squeeze()
         print("Here3")
         sig2_inv_a_y = 1/self.beta + Xq.mm(self.sig_y).mm(Xq.t())
         print("Here4")
 
-        mu_a_z = Xq.mm(self.mu_z.reshape(-1, 1)).squeeze()
+        mu_a_z = Xq.mm(self.mu_z.reshape(-1, 1))#.squeeze()
         print("Here5")
         sig2_inv_a_z = 1/self.beta + Xq.mm(self.sig_z).mm(Xq.t())
 
