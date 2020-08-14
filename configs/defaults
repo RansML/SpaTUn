@@ -1,0 +1,43 @@
+{
+  "mode": "tqp",
+  "dataset_path": "./datasets/toy/toy",
+  "plot_title": "",
+  "surface_threshold": -0,
+  "num_frames": 1,
+  "model_type": "occupancy",
+  "config": "",
+  "save_config": "",
+  "q_resolution": [
+    0.5,
+    0.5,
+    0.5
+  ],
+  "gamma": [
+    0.1
+  ],
+  "h_res": [
+    3,
+    3,
+    3
+  ],
+  "kernel_type": "conv",
+  "num_partitions": [
+    3,
+    3,
+    3
+  ],
+  "area_min": [
+    -100,
+    -100,
+    -50
+  ],
+  "area_max": [
+    100,
+    100,
+    50
+  ],
+  "partition_bleed": 0.25,
+  "occupancy_plot_type": "scatter",
+  "save_model_path": "tmp",
+  "save_query_data_path": "tmp"
+}

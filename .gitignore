@@ -1,0 +1,6 @@
+__pycache__/
+.remote-sync.json
+datasets/
+mdls/
+plots/
+query_data/

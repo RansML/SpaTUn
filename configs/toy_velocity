@@ -1,0 +1,41 @@
+{
+  "dataset_path": "./datasets/toy_velocity/toy_velocity_1",
+  "plot_title": "toy_velocity",
+  "surface_threshold": 0.5,
+  "num_frames": 1,
+  "model_type": "velocity",
+  "likelihood_type":"gaussian",
+  "config": "",
+  "save_config": "./toy_velocity",
+  "q_resolution": [
+    0.5,
+    0.5,
+    0.5
+  ],
+  "gamma": [
+    0.06
+  ],
+  "h_res": [
+    3,
+    3,
+    3
+  ],
+  "kernel_type": "rbf",
+  "num_partitions": [
+    1,
+    1,
+    1
+  ],
+  "area_min": [
+    -20,
+    -20,
+    -2
+  ],
+  "area_max": [
+    20,
+    20,
+    5
+  ],
+  "partition_bleed": 0.25,
+  "occupancy_plot_type": "scatter"
+}
