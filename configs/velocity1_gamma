@@ -1,12 +1,12 @@
 {
-  "dataset_path": "./datasets/toy_velocity/toy_velocity_1",
-  "plot_title": "toy_velocity",
-  "surface_threshold": 10,
+  "dataset_path": "./datasets/velocity1/radar_carla_test1_frame_250",
+  "plot_title": "velocity1_gamma",
+  "surface_threshold": 1,
   "num_frames": 1,
   "model_type": "velocity",
-  "likelihood_type":"gaussian",
+  "likelihood_type":"gamma",
   "config": "",
-  "save_config": "./toy_velocity",
+  "save_config": "./velocity1",
   "q_resolution": [
     1,
     1,
