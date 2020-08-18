@@ -476,7 +476,7 @@ def train_velocity(alpha, beta, X, y_vx, y_vy, y_vz, partitions, cell_resolution
         raise ValueError("Unsupported likelihood type: \"{}\"".format(args.likelihood_type))
 
     time1 = time.time()
-    bhm_velocity_mdl.fit(X, y_vx, y_vy, y_vz, eps=2) # , y_vy, y_vz
+    bhm_velocity_mdl.fit(X, y_vx, y_vy, y_vz, eps=0) # , y_vy, y_vz
     print(' Total training time={} s'.format(round(time.time() - time1, 2)))
     save_mdl(bhm_velocity_mdl, '{}_f{}'.format(args.save_model_path, framei))
     del bhm_velocity_mdl

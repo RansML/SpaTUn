@@ -27,14 +27,14 @@
     1
   ],
   "area_min": [
-    -3,
-    -3,
-    0
+    -20,
+    -20,
+    -2
   ],
   "area_max": [
-    3,
-    10,
-    10
+    20,
+    20,
+    5
   ],
   "partition_bleed": 0.25,
   "occupancy_plot_type": "scatter"
