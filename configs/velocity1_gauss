@@ -1,24 +1,24 @@
 {
   "dataset_path": "./datasets/velocity1/radar_carla_test1_frame_250",
   "plot_title": "velocity1_gauss",
-  "surface_threshold": 10,
+  "surface_threshold": 1.5,
   "num_frames": 1,
   "model_type": "velocity",
   "likelihood_type":"gaussian",
   "config": "",
   "save_config": "./velocity1",
   "q_resolution": [
-    1,
-    1,
-    1
+    0.02,
+    0.02,
+    0.02
   ],
   "gamma": [
-    0.06
+    100
   ],
   "h_res": [
-    3,
-    3,
-    3
+    0.1,
+    0.1,
+    0.1
   ],
   "kernel_type": "rbf",
   "num_partitions": [
@@ -27,14 +27,14 @@
     1
   ],
   "area_min": [
-    -20,
-    -20,
-    -2
+    -0.25,
+    0,
+    -0.2
   ],
   "area_max": [
-    20,
-    20,
-    5
+    0.25,
+    1,
+    0.2
   ],
   "partition_bleed": 0.25,
   "occupancy_plot_type": "scatter"
