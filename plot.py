@@ -429,11 +429,11 @@ class BHM_PLOTTER():
         :param yqs:  filtered N values
         :param fig:
         :param row:
-        :param col:
+        :param col:print("Number of points after filtering: ", Xq_mv.shape[0])
         :param plot_args: symbol, size, opacity, cbar_x_pos, cbar_min, cbar_max
         """
 
-        print("Plotting row={}, col={}".format(row, col))
+        print("Plotting row {}, col {}".format(row, col))
 
         # marker and colorbar arguments
         if plot_args is None:
@@ -492,13 +492,14 @@ class BHM_PLOTTER():
         )
 
         # calc error - possible only when Xq_mv = X
-        # print("RMSE:", torch.sqrt(torch.mean((y_vy - mean_y)**2)).item())
+        if self.args.q_resolution[0] <= 0 and self.args.q_resolution[1] <= 0 and self.args.q_resolution[2] <= 0:
+            print("RMSE:", torch.sqrt(torch.mean((y_vy - mean_y)**2)).item())
 
         # filter by surface threshold
-        print("surface_thresh: ", self.surface_threshold)
-        print("Number of points before filtering: ", Xq_mv.shape[0])
+        print("Surface_thresh: ", self.surface_threshold)
+        print("Number of points before filtering: {}".format(Xq_mv.shape[0]))
         Xq_mv, mean_y = self._filter_predictions_velocity(Xq_mv, mean_y)
-        print("Number of points after filtering: ", Xq_mv.shape[0])
+        print("Number of points before filtering: {}".format(Xq_mv.shape[0]))
 
         # set colorbar
         cbar_min = min(mean_y.min().item(), y_vy.min().item())
@@ -547,7 +548,6 @@ class BHM_PLOTTER():
         :param mean_z: predicted z velocity mean
         :param i: ith frame
         """
-
         print("Plotting 2x3 subplots")
 
         # setup plot
@@ -561,15 +561,16 @@ class BHM_PLOTTER():
         )
 
         # calc error - possible only when Xq_mv = X
-        # print("RMSE:", torch.sqrt(torch.mean((y_vy - mean_y)**2)).item())
+        if self.args.q_resolution[0] <= 0 and self.args.q_resolution[1] <= 0 and self.args.q_resolution[2] <= 0:
+            print("RMSE:", torch.sqrt(torch.mean((y_vy - mean_y)**2)).item())
 
         # filter by surface threshold
-        print("surface_thresh: ", self.surface_threshold)
-        print("Number of points before filtering: ", Xq_mv.shape[0])
+        print("Surface_thresh: ", self.surface_threshold)
+        print("Number of points before filtering: {}".format(Xq_mv.shape[0]))
         Xq_mv_x, mean_x = self._filter_predictions_velocity(Xq_mv, mean_x)
         Xq_mv_y, mean_y = self._filter_predictions_velocity(Xq_mv, mean_y)
         Xq_mv_z, mean_z = self._filter_predictions_velocity(Xq_mv, mean_z)
-        print("Number of points after filtering: ", Xq_mv_x.shape[0], Xq_mv_y.shape[0], Xq_mv_z.shape[0])
+        print("Number of points after filtering x-plot:{}, y-plot:{}, z-plot:{}".format(Xq_mv_x.shape[0], Xq_mv_y.shape[0], Xq_mv_z.shape[0]))
 
         # plot
         for Xq_mv, mean, y_v, col, cbar_x_pos in [(Xq_mv_x, mean_x, y_vx, 1, 0.3), (Xq_mv_y, mean_y, y_vy, 2, 0.7), (Xq_mv_z, mean_z, y_vz, 3, 1.0)]:
@@ -613,9 +614,9 @@ class BHM_PLOTTER():
         time1 = time.time()
 
         # print(torch.sum(y_vx), torch.sum(y_vy), torch.sum(y_vz))
-        if torch.sum(y_vx)*torch.sum(y_vy) == 0: #for radar
+        if torch.sum(y_vx)*torch.sum(y_vy) == 0: #1x3 plot for radar
             self._plot_velocity_1by3(X, y_vy, Xq_mv, mean_y, i)
-        else: #for other
+        else: #2x3 plot for other
             self._plot_velocity_2by3(X, y_vx, y_vy, y_vz, Xq_mv, mean_x, mean_y, mean_z, i)
 
         print('Completed plotting in %2f s' % (time.time()-time1))

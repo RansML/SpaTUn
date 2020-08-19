@@ -8,12 +8,13 @@
   "config": "",
   "save_config": "./velocity1",
   "q_resolution": [
-    0.02,
-    0.02,
-    0.02
+    -0.02,
+    -0.02,
+    -0.02,
+    0.2
   ],
   "gamma": [
-    100
+    1
   ],
   "h_res": [
     0.1,

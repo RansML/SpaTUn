@@ -586,29 +586,94 @@ def query_regression(cell_max_min, X, y_occupancy, g, framei):
 def query_velocity(X, y_vx, y_vy, y_vz, partitions, cell_resolution, cell_max_min, framei):
     bhm_velocity_mdl = load_mdl('velocity/{}_f{}'.format(args.save_model_path, framei), 'BHM_VELOCITY_PYTORCH')
     print("Querying velocity BHM ...")
-    #
-    # print("(query) X.shape:", X.shape)
 
-    # # query the model
-    xx, yy, zz = torch.meshgrid(
-        torch.arange(
-            cell_max_min[0],
-            cell_max_min[1]+args.q_resolution[0],
-            args.q_resolution[0]
-        ),
-        torch.arange(
-            cell_max_min[2],
-            cell_max_min[3]+args.q_resolution[1],
-            args.q_resolution[1]
-        ),
-        torch.arange(
-            cell_max_min[4],
-            cell_max_min[5]+args.q_resolution[2],
-            args.q_resolution[2]
+    if args.q_resolution[0] <= 0 and args.q_resolution[1] <= 0 and args.q_resolution[2] <= 0:
+        #if all q_res are non-positive, then query input = X
+        print("Query data is the same as input data")
+        Xq_mv = X
+    elif args.q_resolution[0] <= 0 or args.q_resolution[1] <= 0 or args.q_resolution[2] <= 0:
+        #if at least one q_res is non-positive, then
+        if args.q_resolution[0] <= 0: #x-slice
+            print("Query data is x={} slice ".format(args.q_resolution[3]))
+            xx, yy, zz = torch.meshgrid(
+                torch.arange(
+                    args.q_resolution[3],
+                    args.q_resolution[3] + 0.1,
+                    1
+                ),
+                torch.arange(
+                    cell_max_min[2],
+                    cell_max_min[3] + args.q_resolution[1],
+                    args.q_resolution[1]
+                ),
+                torch.arange(
+                    cell_max_min[4],
+                    cell_max_min[5] + args.q_resolution[2],
+                    args.q_resolution[2]
+                )
+            )
+            Xq_mv = torch.stack([xx.flatten(), yy.flatten(), zz.flatten()], dim=1)
+        elif args.q_resolution[1] <= 0: #y-slice
+            print("Query data is y={} slice ".format(args.q_resolution[3]))
+            xx, yy, zz = torch.meshgrid(
+                torch.arange(
+                    cell_max_min[0],
+                    cell_max_min[1] + args.q_resolution[0],
+                    args.q_resolution[0]
+                ),
+                torch.arange(
+                    args.q_resolution[3],
+                    args.q_resolution[3] + 0.1,
+                    1
+                ),
+                torch.arange(
+                    cell_max_min[4],
+                    cell_max_min[5] + args.q_resolution[2],
+                    args.q_resolution[2]
+                )
+            )
+            Xq_mv = torch.stack([xx.flatten(), yy.flatten(), zz.flatten()], dim=1)
+        else: #z-slice
+            print("Query data is z={} slice ".format(args.q_resolution[3]))
+            xx, yy, zz = torch.meshgrid(
+                torch.arange(
+                    cell_max_min[0],
+                    cell_max_min[1] + args.q_resolution[0],
+                    args.q_resolution[0]
+                ),
+                torch.arange(
+                    cell_max_min[2],
+                    cell_max_min[3] + args.q_resolution[1],
+                    args.q_resolution[1]
+                ),
+                torch.arange(
+                    args.q_resolution[3],
+                    args.q_resolution[3] + 0.1,
+                    1
+                )
+            )
+            Xq_mv = torch.stack([xx.flatten(), yy.flatten(), zz.flatten()], dim=1)
+    else:
+        #if not use the grid
+        print("Query data is a 3D gird.")
+        xx, yy, zz = torch.meshgrid(
+            torch.arange(
+                cell_max_min[0],
+                cell_max_min[1]+args.q_resolution[0],
+                args.q_resolution[0]
+            ),
+            torch.arange(
+                cell_max_min[2],
+                cell_max_min[3]+args.q_resolution[1],
+                args.q_resolution[1]
+            ),
+            torch.arange(
+                cell_max_min[4],
+                cell_max_min[5]+args.q_resolution[2],
+                args.q_resolution[2]
+            )
         )
-    )
-    Xq_mv = torch.stack([xx.flatten(), yy.flatten(), zz.flatten()], dim=1)
-    # Xq_mv = X + 0.0 #TODO: remove temporary
+        Xq_mv = torch.stack([xx.flatten(), yy.flatten(), zz.flatten()], dim=1)
 
     # xx, yy = torch.meshgrid(
     #     torch.arange(
@@ -672,7 +737,7 @@ def plot():
             plotter.plot_regression_frame(meanVarPlot, filtered, framei, cell_max_min)
         elif args.model_type == "velocity": ###===###
             X, y_vx, y_vy, y_vz, Xq_mv, mean_x, mean_y, mean_z, framei = load_query_data('velocity/{}_f{}'.format(args.save_query_data_path, framei))
-            print("(plot) X.shape:", X.shape)
+            # print("(plot) X.shape:", X.shape)
             # exit()
             plotter.plot_velocity_frame(X, y_vx, y_vy, y_vz, Xq_mv, mean_x, mean_y, mean_z, framei)
 
@@ -698,7 +763,7 @@ if __name__ == '__main__':
     )
 
     # BHM Arguments
-    parser.add_argument('--q_resolution', nargs=3, type=float, help='X Y Z Q-resolution (3 values)')
+    parser.add_argument('--q_resolution', nargs=3, type=float, help='X Y Z Q-resolution (3 values). If any value is negative, a 4th value should be provided to slice the corresponding axis. If all negative, X_query=X_train.')
     parser.add_argument('--gamma', nargs='+', type=float, help='X Y Z Gamma (1-3 values)')
     parser.add_argument('--h_res', nargs=3, type=int, help='X Y Z hinge point resolution (3 values)')
     parser.add_argument('--num_partitions', nargs=3, type=int, help='X Y Z number of partitions per axis (3 values)')
@@ -739,11 +804,17 @@ if __name__ == '__main__':
     fn_train, cell_max_min, cell_resolution = format_config()
     print("\ncell_max_min:", cell_max_min)
     print("cell_resolution:", cell_resolution, "\n")
-    if args.mode == 'tqp' or args.mode == 'to':
+    if args.mode == 'tqp' or args.mode == 't':
         train(fn_train, cell_max_min, cell_resolution)
-    if args.mode == 'tqp' or args.mode == 'qo':
+    if args.mode == 'tqp' or args.mode == 'q':
         query(fn_train, cell_max_min)
-    if args.mode == 'tqp' or args.mode == 'po':
+    if args.mode == 'tqp' or args.mode == 'p':
+        plot()
+    if args.mode == 'tq':
+        train(fn_train, cell_max_min, cell_resolution)
+        query(fn_train, cell_max_min)
+    if args.mode == 'qp':
+        query(fn_train, cell_max_min)
         plot()
 
     print("Complete.")

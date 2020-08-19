@@ -1,24 +1,24 @@
 {
   "dataset_path": "./datasets/toy_velocity/toy_velocity_1",
   "plot_title": "toy_velocity_gauss",
-  "surface_threshold": 2,
+  "surface_threshold": 0,
   "num_frames": 1,
   "model_type": "velocity",
   "likelihood_type":"gaussian",
   "config": "",
   "save_config": "./toy_velocity",
   "q_resolution": [
-    0.5,
-    0.5,
-    0.5
+    -0.5,
+    -0.5,
+    -0.5
   ],
   "gamma": [
     1.5
   ],
   "h_res": [
-    0.5,
-    1,
-    1
+    -0.5,
+    -1,
+    -1
   ],
   "kernel_type": "rbf",
   "num_partitions": [
