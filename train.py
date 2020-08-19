@@ -589,8 +589,6 @@ def query_velocity(X, y_vx, y_vy, y_vz, partitions, cell_resolution, cell_max_mi
     #
     # print("(query) X.shape:", X.shape)
 
-
-
     # # query the model
     xx, yy, zz = torch.meshgrid(
         torch.arange(
@@ -610,6 +608,7 @@ def query_velocity(X, y_vx, y_vy, y_vz, partitions, cell_resolution, cell_max_mi
         )
     )
     Xq_mv = torch.stack([xx.flatten(), yy.flatten(), zz.flatten()], dim=1)
+    # Xq_mv = X + 0.0 #TODO: remove temporary
 
     # xx, yy = torch.meshgrid(
     #     torch.arange(

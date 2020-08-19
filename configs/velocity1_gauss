@@ -1,7 +1,7 @@
 {
   "dataset_path": "./datasets/velocity1/radar_carla_test1_frame_250",
   "plot_title": "velocity1_gauss",
-  "surface_threshold": 1.5,
+  "surface_threshold": 1,
   "num_frames": 1,
   "model_type": "velocity",
   "likelihood_type":"gaussian",

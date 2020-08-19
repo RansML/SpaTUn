@@ -382,7 +382,7 @@ class BHM_PLOTTER():
         plotly.offline.plot(fig, filename=os.path.abspath('./plots/regression/{}_frame{}.html'.format(self.plot_title, i)), auto_open=False)#True)
         print('Completed plotting in %2f s' % (time.time()-time1))
 
-    def _old_filter_predictions_velocity(self, ploti, surface_threshold):
+    def filter_predictions_velocity(self, ploti, surface_threshold):
         """
         @param ploti: (Xq, yq, var) (3D location and occupancy prediction)
         @return toPlot: array of (Xq, yq) filtered to show only occupancy surface
@@ -412,147 +412,89 @@ class BHM_PLOTTER():
         # print()
         return filtered[:,:3], filtered[:,3]
 
-    def _filter_predictions_velocity(self, X, y):
+    def plot_velocity_stuff(self, toPlot, fig, surface_threshold, row, col):
         """
-        :param X: Nx3 position
-        :param y: N values
-        :return: thresholded X, y vals
-        """
-        mask = y.squeeze() >= self.surface_threshold
+        Occupancy: Plots volumetric plot of predictions
 
-        return X[mask, :], y[mask,:]
-
-    def _plot_velocity_scatter(self, Xqs, yqs, fig, row, col, plot_args=None):
-        """
-        # generic method for any plot
-        :param Xqs: filtered Nx3 position
-        :param yqs:  filtered N values
-        :param fig:
-        :param row:
-        :param col:
-        :param plot_args: symbol, size, opacity, cbar_x_pos, cbar_min, cbar_max
+        @param toPlot: array of (Xq, yq, vars) (3D location and occupancy prediction)
+        @param fig: plotly fig
         """
 
-        print("Plotting row={}, col={}".format(row, col))
+        print("{}, {}: {}".format(row, col, surface_threshold))
 
-        # marker and colorbar arguments
-        if plot_args is None:
-            symbol, size, opacity, cbar_x_pos, cbar_min, cbar_max = 'square', 8, 0.2, False, yqs[:,0].min(), yqs[:,0].max()
-        else:
-            symbol, size, opacity, cbar_x_pos, cbar_min, cbar_max = plot_args
-        if cbar_x_pos is not False:
-            colorbar = dict(x=cbar_x_pos,
-                            len=1,
-                            y=0.5
-                        )
-        else:
-            colorbar = dict()
+        Xqs = torch.zeros((1,3))
+        yqs = torch.ones(1)
+        # vars = torch.zeros(1)
+        for ploti in toPlot:
+            # # var = ploti[2]
+            # print("ploti[1]:", ploti[1])
+            if surface_threshold is not None:
+                ploti = self.filter_predictions_velocity(ploti, surface_threshold)
+                # print("Surface threshold is not None")
+            else:
+                ploti = (ploti[0].unsqueeze(0), ploti[1])
+            Xq, yq = ploti[0], ploti[1]
+            Xqs = torch.cat((Xqs, Xq), dim=0)
+            yqs = torch.cat((yqs, yq), dim=0)
 
-        # plot
+        yqs = yqs[1:]
+        print('Num points plotted after filtering: {}'.format(yqs.shape[0]))
+
+        colorbar_len = 1
+        colorbar_y = 0.5
+
+
         fig.add_trace(
             go.Scatter3d(
-                x=Xqs[:,0],
-                y=Xqs[:,1],
-                z=Xqs[:,2],
+                x=Xqs[1:,0],
+                y=Xqs[1:,1],
+                z=Xqs[1:,2],
                 mode='markers',
                 marker=dict(
-                    color=yqs[:,0],
-                    colorscale="Jet",
-                    cmax=cbar_max,
-                    cmin=cbar_min,
-                    colorbar=colorbar,
-                    opacity=opacity,
-                    symbol=symbol,
-                    size=size
+                    color=yqs,
+                    coloraxis="coloraxis",
+                    opacity=0.1,
+                    symbol='square',
                 ),
             ),
             row=row,
             col=col
         )
 
-    def _plot_velocity_1by3(self, X, y_vy, Xq_mv, mean_y, i):
-        """
-        # This plot is good for radar data
-        :param X: ground truth positions
-        :param y_vy: ground truth y velocity
-        :param Xq_mv: query X positions
-        :param mean_y: predicted y velocity mean
-        :param i: ith frame
-        """
-        print("Plotting 1x3 subplots")
+        # fig.add_trace(
+        #     go.Scatter3d(
+        #         x=Xqs[1:,0],
+        #         y=Xqs[1:,1],
+        #         z=Xqs[1:,2],
+        #         mode='markers',
+        #         marker=dict(
+        #             color=yqs,
+        #             colorscale = "Jet",
+        #             cmax=yqs.max().item(),
+        #             cmin=yqs.min().item(),
+        #             colorbar=dict(
+        #                 x=0.65,
+        #                 len=colorbar_len,
+        #                 y=colorbar_y
+        #             ),
+        #             opacity=0.1,
+        #             symbol='square',
+        #         ),
+        #     ),
+        #     row=row,
+        #     col=col
+        # )
 
-        # setup plot
-        specs = [[{"type": "scene"}, {"type": "scene"}, {"type": "scene"}],]
-        titles = ["y-velocity", "y-velocity preds mean", "y-velocity preds var"]
-        fig = make_subplots(
-            rows=1,
-            cols=3,
-            specs=specs,
-            subplot_titles=titles
-        )
+    def plot_velocity_frame(self, X, y_vx, y_vy, y_vz, Xq_mv, mean_x, mean_y, mean_z, i):
+        time1 = time.time()
+        # specs = [[{"type": "scene"}, {"type": "scene"}, {"type": "scene"}]]
+        specs = [[{"type": "scene"}, {"type": "scene"}, {"type": "scene"}],
+                 [{"type": "scene"}, {"type": "scene"}, {"type": "scene"}]]
 
-        # calc error - possible only when Xq_mv = X
-        # print("RMSE:", torch.sqrt(torch.mean((y_vy - mean_y)**2)).item())
-
-        # filter by surface threshold
-        print("surface_thresh: ", self.surface_threshold)
-        print("Number of points before filtering: ", Xq_mv.shape[0])
-        Xq_mv, mean_y = self._filter_predictions_velocity(Xq_mv, mean_y)
-        print("Number of points after filtering: ", Xq_mv.shape[0])
-
-        # set colorbar
-        cbar_min = min(mean_y.min().item(), y_vy.min().item())
-        cbar_max = max(mean_y.max().item(), y_vy.max().item())
-        # fig.update_layout(coloraxis={'colorscale':'Jet', "cmin":cbar_min, "cmax":max_c}) # global colrobar
-
-        # plot
-        # plot_args - symbol, size, opacity, cbar_x_pos, cbar_min, cbar_max
-        plot_args_data =      ['circle', 5, 0.7, 0.3, cbar_min, cbar_max]
-        plot_args_pred_mean = ['square', 8, 0.1, 0.6, cbar_min, cbar_max]
-        # plot_args_data = ['circle', 5, 0.7, 0.3, y_vy.min().item(), y_vy.max().item()]
-        # plot_args_pred_mean = ['circle', 5, 0.7, 0.6, y_vy.min().item(), y_vy.max().item()]
-        self._plot_velocity_scatter(X.float(), y_vy, fig, 1, 1, plot_args_data)
-        self._plot_velocity_scatter(Xq_mv.float(), mean_y.float(), fig, 1, 2, plot_args_pred_mean)
-
-        # update camera
-        camera = dict(
-            eye=dict(x=2.25, y=-2.25, z=1.25)
-        )
-        fig.layout.scene1.camera = camera
-        fig.layout.scene2.camera = camera
-
-        # update plot settings
-        layout = dict(xaxis=dict(nticks=4, range=[self.args.area_min[0], self.args.area_max[0]], ),
-                      yaxis=dict(nticks=4, range=[self.args.area_min[1], self.args.area_max[1]], ),
-                      zaxis=dict(nticks=4, range=[self.args.area_min[2], self.args.area_max[2]], ),
-                      aspectmode="manual",
-                      aspectratio=dict(x=2, y=2, z=2))
-                        # width=700,
-                        # margin=dict(r=20, l=10, b=10, t=10))
-        fig.update_layout(scene1=layout, scene2=layout)
-
-        fig.update_layout(title='{}_velocity_frame{}'.format(self.plot_title, i), height=500)
-        plotly.offline.plot(fig, filename=os.path.abspath('./plots/velocity/{}_frame{}.html'.format(self.plot_title, i)), auto_open=False)
-
-    def _plot_velocity_2by3(self, X, y_vx, y_vy, y_vz, Xq_mv, mean_x, mean_y, mean_z, i):
-        """
-        # This plot is good when 3 (or less) directional components of the velocity are available
-        :param X: ground truth positions
-        :param y_vx: ground truth x velocity
-        :param y_vy: ground truth y velocity
-        :param y_vz: ground truth z velocity
-        :param Xq_mv: query X positions
-        :param mean_x: predicted x velocity mean
-        :param mean_y: predicted y velocity mean
-        :param mean_z: predicted z velocity mean
-        :param i: ith frame
-        """
-
-        print("Plotting 2x3 subplots")
-
-        # setup plot
-        specs = [[{"type": "scene"}, {"type": "scene"}, {"type": "scene"}],[{"type": "scene"}, {"type": "scene"}, {"type": "scene"}]]
-        titles = ["x-velocity", "y-velocity", "z-velocity", "x-velocity preds mean", "y-velocity preds mean", "z-velocity preds mean",]
+        titles = ["x-velocity", "y-velocity", "z-velocity",
+                  "x-velocity preds", "y-velocity preds", "z-velocity preds"]
+        titles = ["x-velocity", "y-velocity", "z-velocity"]
+        # titles = ["x-velocity preds", "y-velocity preds", "z-velocity preds"]
         fig = make_subplots(
             rows=2,
             cols=3,
@@ -560,37 +502,46 @@ class BHM_PLOTTER():
             subplot_titles=titles
         )
 
-        # calc error - possible only when Xq_mv = X
-        # print("RMSE:", torch.sqrt(torch.mean((y_vy - mean_y)**2)).item())
+        print("Xq_mv.shape:", Xq_mv.shape)
+        print("X.shape:", X.shape)
+        #
+        print("mean_x.shape:", mean_x.shape)
+        # print("X[:, 0].shape:", X[:, 0].shape)
 
-        # filter by surface threshold
-        print("surface_thresh: ", self.surface_threshold)
-        print("Number of points before filtering: ", Xq_mv.shape[0])
-        Xq_mv_x, mean_x = self._filter_predictions_velocity(Xq_mv, mean_x)
-        Xq_mv_y, mean_y = self._filter_predictions_velocity(Xq_mv, mean_y)
-        Xq_mv_z, mean_z = self._filter_predictions_velocity(Xq_mv, mean_z)
-        print("Number of points after filtering: ", Xq_mv_x.shape[0], Xq_mv_y.shape[0], Xq_mv_z.shape[0])
+        print("y_vx.shape:", y_vx.shape)
+        # exit()
 
-        # plot
-        for Xq_mv, mean, y_v, col, cbar_x_pos in [(Xq_mv_x, mean_x, y_vx, 1, 0.3), (Xq_mv_y, mean_y, y_vy, 2, 0.7), (Xq_mv_z, mean_z, y_vz, 3, 1.0)]:
-            if y_v.shape[0]*mean.shape[0] > 0: #if there are filtered points and mean preds
-                # set colorbar
-                cbar_min = min(mean.min().item(), y_v.min().item())
-                cbar_max = max(mean.max().item(), y_v.max().item())
-                # fig.update_layout(coloraxis={'colorscale':'Jet', "cmin":cbar_min, "cmax":max_c}) # global colorbar
+        min_c = min(mean_x.min().item(), mean_y.min().item(), mean_z.min().item(), y_vx.min().item(), y_vy.min().item(), y_vz.min().item())
+        max_c = max(mean_x.max().item(), mean_y.max().item(), mean_z.max().item(), y_vx.max().item(), y_vy.max().item(), y_vz.max().item())
 
-                # plot_args - symbol, size, opacity, cbar_x_pos, cbar_min, cbar_max
-                plot_args_data =      ['circle', 5, 0.7, cbar_x_pos, cbar_min, cbar_max]
-                plot_args_pred_mean = ['square', 8, 0.2, False, cbar_min, cbar_max]
-                # plot_args_data = ['circle', 5, 0.7, 0.3, y_vy.min().item(), y_vy.max().item()]
-                # plot_args_pred_mean = ['circle', 5, 0.7, 0.6, y_vy.min().item(), y_vy.max().item()]
-                self._plot_velocity_scatter(X.float(), y_v, fig, 1, col, plot_args_data)
-                self._plot_velocity_scatter(Xq_mv.float(), mean.float(), fig, 2, col, plot_args_pred_mean)
+        fig.update_layout(coloraxis={'colorscale':'Jet', "cmin":min_c, "cmax":max_c})
 
-        # update camera
+        self.plot_velocity_stuff(zip(X.float(), y_vx), fig, None, 1, 1)
+        self.plot_velocity_stuff(zip(X.float(), y_vy), fig,  None, 1, 2)
+        self.plot_velocity_stuff(zip(X.float(), y_vz), fig, None, 1, 3)
+
+        # self.plot_velocity_stuff(zip(Xq_mv.float(), mean_x.float()), fig, 15, 2, 1)
+        # self.plot_velocity_stuff(zip(Xq_mv.float(), mean_y.float()), fig, 15, 2, 2)
+        # self.plot_velocity_stuff(zip(Xq_mv.float(), mean_z.float()), fig, None, 2, 3)
+        self.plot_velocity_stuff(zip(Xq_mv.float(), mean_x.float()), fig, None if torch.all(mean_x == 0) else self.surface_threshold, 2, 1)
+        self.plot_velocity_stuff(zip(Xq_mv.float(), mean_y.float()), fig, None if torch.all(mean_y == 0) else self.surface_threshold, 2, 2)
+        self.plot_velocity_stuff(zip(Xq_mv.float(), mean_z.float()), fig, None if torch.all(mean_z == 0) else self.surface_threshold, 2, 3)
+        # self.plot_velocity_stuff(zip(X.float(), y_vx), fig, None if torch.all(y_vx == 0) else self.surface_threshold, 1, 1)
+
+        print("mean_x:", mean_x)
+        print("mean_y:", mean_y)
+        print("mean_z:", mean_z)
+
+        # camera = dict(
+        #     eye=dict(x=1.35, y=-1.35, z=0.75)
+        # )
+        # camera = dict(
+        #     eye=dict(x=1.125, y=-1.125, z=0.625)
+        # )
         camera = dict(
             eye=dict(x=2.25, y=-2.25, z=1.25)
         )
+
         fig.layout.scene1.camera = camera
         fig.layout.scene2.camera = camera
         fig.layout.scene3.camera = camera
@@ -598,24 +549,44 @@ class BHM_PLOTTER():
         fig.layout.scene5.camera = camera
         fig.layout.scene6.camera = camera
 
-        # update plot settings
-        layout = dict(xaxis=dict(nticks=4, range=[self.args.area_min[0], self.args.area_max[0]], ),
-             yaxis=dict(nticks=4, range=[self.args.area_min[1], self.args.area_max[1]], ),
-             zaxis=dict(nticks=4, range=[self.args.area_min[2], self.args.area_max[2]], ),
-             aspectmode="manual",
-             aspectratio=dict(x=2, y=2, z=2))
-        fig.update_layout(scene1=layout,scene2=layout,scene3=layout,scene4=layout,scene5=layout,scene6=layout)
+        fig.update_layout(scene1=dict(xaxis = dict(nticks=4, range=[self.args.area_min[0], self.args.area_max[0]],),
+                                     yaxis = dict(nticks=4, range=[self.args.area_min[1], self.args.area_max[1]],),
+                                     zaxis = dict(nticks=4, range=[self.args.area_min[2], self.args.area_max[2]],),
+                                     aspectmode="manual",
+                                     aspectratio=dict(x=2, y=2, z=1)),)
+                                 # width=700,
+                                 # margin=dict(r=20, l=10, b=10, t=10))
 
-        fig.update_layout(title='{}_velocity_frame{}'.format(self.plot_title, i), height=800)
-        plotly.offline.plot(fig, filename=os.path.abspath('./plots/velocity/{}_frame{}.html'.format(self.plot_title, i)), auto_open=False)
+        fig.update_layout(scene2=dict(xaxis = dict(nticks=4, range=[self.args.area_min[0], self.args.area_max[0]],),
+                                     yaxis = dict(nticks=4, range=[self.args.area_min[1], self.args.area_max[1]],),
+                                     zaxis = dict(nticks=4, range=[self.args.area_min[2], self.args.area_max[2]],),
+                                     aspectmode="manual",
+                                     aspectratio=dict(x=2, y=2, z=1)),)
 
-    def plot_velocity_frame(self, X, y_vx, y_vy, y_vz, Xq_mv, mean_x, mean_y, mean_z, i):
-        time1 = time.time()
+        fig.update_layout(scene3=dict(xaxis = dict(nticks=4, range=[self.args.area_min[0], self.args.area_max[0]],),
+                                     yaxis = dict(nticks=4, range=[self.args.area_min[1], self.args.area_max[1]],),
+                                     zaxis = dict(nticks=4, range=[self.args.area_min[2], self.args.area_max[2]],),
+                                     aspectmode="manual",
+                                     aspectratio=dict(x=2, y=2, z=1)),)
 
-        # print(torch.sum(y_vx), torch.sum(y_vy), torch.sum(y_vz))
-        if torch.sum(y_vx)*torch.sum(y_vy) == 0: #for radar
-            self._plot_velocity_1by3(X, y_vy, Xq_mv, mean_y, i)
-        else: #for other
-            self._plot_velocity_2by3(X, y_vx, y_vy, y_vz, Xq_mv, mean_x, mean_y, mean_z, i)
+        fig.update_layout(scene4=dict(xaxis = dict(nticks=4, range=[self.args.area_min[0], self.args.area_max[0]],),
+                                     yaxis = dict(nticks=4, range=[self.args.area_min[1], self.args.area_max[1]],),
+                                     zaxis = dict(nticks=4, range=[self.args.area_min[2], self.args.area_max[2]],),
+                                     aspectmode="manual",
+                                     aspectratio=dict(x=2, y=2, z=1)),)
 
+        fig.update_layout(scene5=dict(xaxis = dict(nticks=4, range=[self.args.area_min[0], self.args.area_max[0]],),
+                                     yaxis = dict(nticks=4, range=[self.args.area_min[1], self.args.area_max[1]],),
+                                     zaxis = dict(nticks=4, range=[self.args.area_min[2], self.args.area_max[2]],),
+                                     aspectmode="manual",
+                                     aspectratio=dict(x=2, y=2, z=1)),)
+
+        fig.update_layout(scene6=dict(xaxis = dict(nticks=4, range=[self.args.area_min[0], self.args.area_max[0]],),
+                                     yaxis = dict(nticks=4, range=[self.args.area_min[1], self.args.area_max[1]],),
+                                     zaxis = dict(nticks=4, range=[self.args.area_min[2], self.args.area_max[2]],),
+                                     aspectmode="manual",
+                                     aspectratio=dict(x=2, y=2, z=1)),)
+
+        fig.update_layout(title='{}_occupancy_frame{}'.format(self.plot_title, i), height=800)
+        plotly.offline.plot(fig, filename=os.path.abspath('./plots/velocity/{}_frame{}.html'.format(self.plot_title, i)), auto_open=False)#True)
         print('Completed plotting in %2f s' % (time.time()-time1))
