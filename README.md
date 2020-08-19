@@ -1,9 +1,9 @@
-# 3D Bayesian Hilbert Maps
+# SpaTUn: Spatio-Temporal Uncertainty
 
 ![Alt text](./plots/Regression_sample.png?raw=true "Regression Sample")
 ![Alt text](./plots/Occupancy_sample.png?raw=true "Classification Sample")
 
-Through Bayesian Hilbert mapping (BHM), we are able to make fast occupancy predictions of our environment. Through research that we conducted last quarter, we have seen this approach work well in the 3D case when predicting occupancy based off of LIDAR observations. As a next step, we utilize Bayesian Hilbert maps to perform regression, which allows us to generate mean and variance mappings using simulated real environments such as AirSim. To best consolidate and visualize this information, we utilize interactive 3D plotting frameworks to showcase our predictions. In this repository, we implement 3D Bayesian Hilbert Maps along with a Convolutional and a Wasserstein RBF Kernel. Also included is a modular training and plotting class which summarizes regression and classification results on datasets formatted with schema: (t,X,Y,Z,occupancy,sigma_x, sigma_y, sigma_z).
+Description.
 
 ### Prerequisites
 
@@ -27,14 +27,14 @@ Through Bayesian Hilbert mapping (BHM), we are able to make fast occupancy predi
 
 The BHM training and plotting module provides a way to quickly save and load experiment configurations via the configs folder. This can be done by setting --config [config_file_name] to load a config, or --save_config [save_to_path] to save a config. For a full list of editable hyper-parameters, refer to the documentation in train.py.
 
-### Sample Classification Configurations
+### Sample 3D Bernoulli (Classification) Configurations
 
 Toy3 Dataset: Simple dataset with LIDAR hits along with adjustable uncertainty (sigma). The dataset is located in datasets/toy3/toy3.csv. To run the sample, use:
 ```
 python3 train.py --config toy3_occupancy
 ```
 
-### Sample Regression Configurations
+### Sample 2D Gaussian (Regression) Configurations
 
 Toy Dataset: Simple dataset with LIDAR hits along with adjustable uncertainty (sigma). The dataset is located in datasets/toy/toy.csv. To run the sample, use:
 ```
@@ -49,4 +49,16 @@ python3 train.py --config toy2_regression
 Toy3 Dataset: Simple dataset with LIDAR hits along with adjustable uncertainty (sigma). The dataset is located in datasets/toy3/toy3.csv. To run the sample, use:
 ```
 python3 train.py --config toy3_regression
+```
+
+### Sample 3D Gaussian (Regression) Configurations
+
+Toy 3D velocty dataset in /datasets/toy_velocity/toy_velocity_1.csv:
+```
+python train.py --config toy_velocity_gauss
+```
+
+Carla radar dataset in /velocity1/radar_carla_test1_frame_250.csv:
+```
+python train.py --config velocity1_gauss
 ```
