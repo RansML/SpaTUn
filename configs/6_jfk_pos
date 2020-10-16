@@ -1,24 +1,25 @@
 {
-  "dataset_path": "./datasets/toy_velocity/toy_velocity_1",
-  "plot_title": "toy_velocity_gauss",
-  "surface_threshold": 0,
+  "dataset_path": "./datasets/jfk/txyzv3_pos",
+  "plot_title": "jfk_txyzv3_pos",
+  "surface_threshold": [-500,500],
   "num_frames": 1,
   "model_type": "velocity",
   "likelihood_type":"gaussian",
   "config": "",
-  "save_config": "./toy_velocity",
+  "save_config": "./jfk_txyzv3_pos",
   "q_resolution": [
-    -0.5,
-    -0.5,
-    -0.5
+    0.2,
+    0.2,
+    -0.2,
+    10
   ],
   "gamma": [
-    1.5
+    1
   ],
   "h_res": [
-    0.5,
-    1,
-    1
+    0.3,
+    0.3,
+    0.3
   ],
   "kernel_type": "rbf",
   "num_partitions": [
@@ -27,14 +28,14 @@
     1
   ],
   "area_min": [
-    -3,
-    -3,
+    -2,
+    -2,
     0
   ],
   "area_max": [
-    3,
-    10,
-    10
+    2,
+    2,
+    12
   ],
   "partition_bleed": 0.25,
   "occupancy_plot_type": "scatter"

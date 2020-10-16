@@ -20,7 +20,7 @@ Description.
 
   Clone the repository
   ```
-  git clone https://github.com/JasonZheng20/Jason_BHM_3D.git
+  git clone https://github.com/RansML/SpaTUn.git
   ```
 
 ## Example Configurations
@@ -31,34 +31,34 @@ The BHM training and plotting module provides a way to quickly save and load exp
 
 Toy3 Dataset: Simple dataset with LIDAR hits along with adjustable uncertainty (sigma). The dataset is located in datasets/toy3/toy3.csv. To run the sample, use:
 ```
-python3 train.py --config toy3_occupancy
+python3 spatun.py --config toy3_occupancy
 ```
 
 ### Sample 2D Gaussian (Regression) Configurations
 
 Toy Dataset: Simple dataset with LIDAR hits along with adjustable uncertainty (sigma). The dataset is located in datasets/toy/toy.csv. To run the sample, use:
 ```
-python3 train.py --config toy_regression
+python3 spatun.py --config toy_regression
 ```
 
 Toy2 Dataset: Simple dataset with LIDAR hits along with adjustable uncertainty (sigma). The dataset is located in datasets/toy2/toy2.csv. To run the sample, use:
 ```
-python3 train.py --config toy2_regression
+python3 spatun.py --config toy2_regression
 ```
 
 Toy3 Dataset: Simple dataset with LIDAR hits along with adjustable uncertainty (sigma). The dataset is located in datasets/toy3/toy3.csv. To run the sample, use:
 ```
-python3 train.py --config toy3_regression
+python3 spatun.py --config toy3_regression
 ```
 
 ### Sample 3D Gaussian (Regression) Configurations
 
 Toy 3D velocty dataset in /datasets/toy_velocity/toy_velocity_1.csv:
 ```
-python train.py --config toy_velocity_gauss
+python spatun.py --config toy_velocity_gauss
 ```
 
 Carla radar dataset in /velocity1/radar_carla_test1_frame_250.csv:
 ```
-python train.py --config velocity1_gauss
+python spatun.py --config velocity1_gauss
 ```

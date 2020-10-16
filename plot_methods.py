@@ -22,7 +22,7 @@ class BHM_PLOTTER():
         self.q_resolution = q_resolution
         self.occupancy_plot_type = occupancy_plot_type
         self.plot_denoise = plot_denoise
-        print('Successfully initialized plotly plotting class')
+        print(' Successfully initialized plotly plotting class')
 
     def filter_predictions(self, ploti):
         """
@@ -418,7 +418,12 @@ class BHM_PLOTTER():
         :param y: N values
         :return: thresholded X, y vals
         """
-        mask = y.squeeze() >= self.surface_threshold
+        if len(self.surface_threshold) == 1:
+            mask = y.squeeze() >= self.surface_threshold[0]
+        else:
+            min_mask = y.squeeze() >= self.surface_threshold[0]
+            max_mask = y.squeeze() <= self.surface_threshold[1]
+            mask = torch.logical_and(min_mask, max_mask)
 
         return X[mask, :], y[mask,:]
 
@@ -433,7 +438,7 @@ class BHM_PLOTTER():
         :param plot_args: symbol, size, opacity, cbar_x_pos, cbar_min, cbar_max
         """
 
-        print("Plotting row {}, col {}".format(row, col))
+        print(" Plotting row {}, col {}".format(row, col))
 
         # marker and colorbar arguments
         if plot_args is None:
@@ -479,7 +484,7 @@ class BHM_PLOTTER():
         :param mean_y: predicted y velocity mean
         :param i: ith frame
         """
-        print("Plotting 1x3 subplots")
+        print(" Plotting 1x3 subplots")
 
         # setup plot
         specs = [[{"type": "scene"}, {"type": "scene"}, {"type": "scene"}],]
@@ -493,13 +498,13 @@ class BHM_PLOTTER():
 
         # calc error - possible only when Xq_mv = X
         if self.args.q_resolution[0] <= 0 and self.args.q_resolution[1] <= 0 and self.args.q_resolution[2] <= 0:
-            print("RMSE:", torch.sqrt(torch.mean((y_vy - mean_y)**2)).item())
+            print(" RMSE:", torch.sqrt(torch.mean((y_vy - mean_y)**2)).item())
 
         # filter by surface threshold
-        print("Surface_thresh: ", self.surface_threshold)
-        print("Number of points before filtering: {}".format(Xq_mv.shape[0]))
+        print(" Surface_thresh: ", self.surface_threshold)
+        print(" Number of points before filtering: {}".format(Xq_mv.shape[0]))
         Xq_mv, mean_y = self._filter_predictions_velocity(Xq_mv, mean_y)
-        print("Number of points before filtering: {}".format(Xq_mv.shape[0]))
+        print(" Number of points after filtering: {}".format(Xq_mv.shape[0]))
 
         # set colorbar
         cbar_min = min(mean_y.min().item(), y_vy.min().item())
@@ -508,10 +513,11 @@ class BHM_PLOTTER():
 
         # plot
         # plot_args - symbol, size, opacity, cbar_x_pos, cbar_min, cbar_max
-        plot_args_data =      ['circle', 5, 0.7, 0.3, cbar_min, cbar_max]
-        plot_args_pred_mean = ['square', 8, 0.1, 0.6, cbar_min, cbar_max]
+        plot_args_data =      ['circle', 1, 0.7, 0.3, cbar_min, cbar_max]
+        plot_args_pred_mean = ['square', 3, 0.1, 0.6, cbar_min, cbar_max]
         # plot_args_data = ['circle', 5, 0.7, 0.3, y_vy.min().item(), y_vy.max().item()]
         # plot_args_pred_mean = ['circle', 5, 0.7, 0.6, y_vy.min().item(), y_vy.max().item()]
+        print("X:", X.shape)
         self._plot_velocity_scatter(X.float(), y_vy, fig, 1, 1, plot_args_data)
         self._plot_velocity_scatter(Xq_mv.float(), mean_y.float(), fig, 1, 2, plot_args_pred_mean)
 
@@ -533,7 +539,9 @@ class BHM_PLOTTER():
         fig.update_layout(scene1=layout, scene2=layout)
 
         fig.update_layout(title='{}_velocity_frame{}'.format(self.plot_title, i), height=500)
-        plotly.offline.plot(fig, filename=os.path.abspath('./plots/velocity/{}_frame{}.html'.format(self.plot_title, i)), auto_open=False)
+        filename = os.path.abspath('./plots/velocity/{}_frame{}.html'.format(self.plot_title, i))
+        plotly.offline.plot(fig, filename=filename, auto_open=False)
+        print(' Plot saved as ' + filename)
 
     def _plot_velocity_2by3(self, X, y_vx, y_vy, y_vz, Xq_mv, mean_x, mean_y, mean_z, i):
         """
@@ -548,7 +556,7 @@ class BHM_PLOTTER():
         :param mean_z: predicted z velocity mean
         :param i: ith frame
         """
-        print("Plotting 2x3 subplots")
+        print(" Plotting 2x3 subplots")
 
         # setup plot
         specs = [[{"type": "scene"}, {"type": "scene"}, {"type": "scene"}],[{"type": "scene"}, {"type": "scene"}, {"type": "scene"}]]
@@ -562,15 +570,15 @@ class BHM_PLOTTER():
 
         # calc error - possible only when Xq_mv = X
         if self.args.q_resolution[0] <= 0 and self.args.q_resolution[1] <= 0 and self.args.q_resolution[2] <= 0:
-            print("RMSE:", torch.sqrt(torch.mean((y_vy - mean_y)**2)).item())
+            print(" RMSE:", torch.sqrt(torch.mean((y_vy - mean_y)**2)).item())
 
         # filter by surface threshold
-        print("Surface_thresh: ", self.surface_threshold)
-        print("Number of points before filtering: {}".format(Xq_mv.shape[0]))
+        print(" Surface_thresh: ", self.surface_threshold)
+        print(" Number of points before filtering: {}".format(Xq_mv.shape[0]))
         Xq_mv_x, mean_x = self._filter_predictions_velocity(Xq_mv, mean_x)
         Xq_mv_y, mean_y = self._filter_predictions_velocity(Xq_mv, mean_y)
         Xq_mv_z, mean_z = self._filter_predictions_velocity(Xq_mv, mean_z)
-        print("Number of points after filtering x-plot:{}, y-plot:{}, z-plot:{}".format(Xq_mv_x.shape[0], Xq_mv_y.shape[0], Xq_mv_z.shape[0]))
+        print(" Number of points after filtering x-plot:{}, y-plot:{}, z-plot:{}".format(Xq_mv_x.shape[0], Xq_mv_y.shape[0], Xq_mv_z.shape[0]))
 
         # plot
         for Xq_mv, mean, y_v, col, cbar_x_pos in [(Xq_mv_x, mean_x, y_vx, 1, 0.3), (Xq_mv_y, mean_y, y_vy, 2, 0.7), (Xq_mv_z, mean_z, y_vz, 3, 1.0)]:
@@ -581,8 +589,8 @@ class BHM_PLOTTER():
                 # fig.update_layout(coloraxis={'colorscale':'Jet', "cmin":cbar_min, "cmax":max_c}) # global colorbar
 
                 # plot_args - symbol, size, opacity, cbar_x_pos, cbar_min, cbar_max
-                plot_args_data =      ['circle', 5, 0.7, cbar_x_pos, cbar_min, cbar_max]
-                plot_args_pred_mean = ['square', 8, 0.2, False, cbar_min, cbar_max]
+                plot_args_data =      ['circle', 1, 0.7, cbar_x_pos, cbar_min, cbar_max]
+                plot_args_pred_mean = ['square', 1, 0.2, False, cbar_min, cbar_max]
                 # plot_args_data = ['circle', 5, 0.7, 0.3, y_vy.min().item(), y_vy.max().item()]
                 # plot_args_pred_mean = ['circle', 5, 0.7, 0.6, y_vy.min().item(), y_vy.max().item()]
                 self._plot_velocity_scatter(X.float(), y_v, fig, 1, col, plot_args_data)
@@ -608,7 +616,9 @@ class BHM_PLOTTER():
         fig.update_layout(scene1=layout,scene2=layout,scene3=layout,scene4=layout,scene5=layout,scene6=layout)
 
         fig.update_layout(title='{}_velocity_frame{}'.format(self.plot_title, i), height=800)
-        plotly.offline.plot(fig, filename=os.path.abspath('./plots/velocity/{}_frame{}.html'.format(self.plot_title, i)), auto_open=False)
+        filename = os.path.abspath('./plots/velocity/{}_frame{}.html'.format(self.plot_title, i))
+        plotly.offline.plot(fig, filename=filename, auto_open=False)
+        print(' Plot saved as '+filename)
 
     def plot_velocity_frame(self, X, y_vx, y_vy, y_vz, Xq_mv, mean_x, mean_y, mean_z, i):
         time1 = time.time()
@@ -619,4 +629,4 @@ class BHM_PLOTTER():
         else: #2x3 plot for other
             self._plot_velocity_2by3(X, y_vx, y_vy, y_vz, Xq_mv, mean_x, mean_y, mean_z, i)
 
-        print('Completed plotting in %2f s' % (time.time()-time1))
+        print(' Total plotting time=%2f s' % (time.time()-time1))

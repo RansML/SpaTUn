@@ -257,10 +257,7 @@ class BHM_REGRESSION_PYTORCH():
         """
         X = self.__sparse_features(X, self.sigma, self.rbf_kernel_type)
         N, D = X.shape[0], X.shape[1]
-
-        print("self.grid:", self.grid)
-        print("X:\n", X)
-        print("X.shape:", X.shape)
+        print(" N,D:", self.grid, X.shape)
 
         self.mu, self.sig = self.__calc_posterior(X, y)
         return self.mu, self.sig
@@ -271,16 +268,13 @@ class BHM_REGRESSION_PYTORCH():
         :return: mean occupancy (Laplace approximation)
         """
         Xq = self.__sparse_features(Xq, None, self.rbf_kernel_type)
-
-        print("\nXq.shape:", Xq.shape)
-        print("self.mu.shape:", self.mu.shape)
-        print("self.mu.reshape(-1, 1).shape:", self.mu.reshape(-1, 1).shape)
+        print(" Xq.shape:", Xq.shape)
 
         mu_a = Xq.mm(self.mu.reshape(-1, 1)).squeeze()
-        print("mu_a.shape:", mu_a.shape)
-        print("self.sig.shape:", self.sig.shape)
+        #print("mu_a.shape:", mu_a.shape)
+        #print("self.sig.shape:", self.sig.shape)
         sig2_inv_a = 1/self.beta + Xq.mm(self.sig).mm(Xq.t())
-        print("sig2_inv_a.shape:", sig2_inv_a.shape)
+        #print("sig2_inv_a.shape:", sig2_inv_a.shape)
         return mu_a, sig2_inv_a
 
 
@@ -291,6 +285,7 @@ class BHM_REGRESSION_PYTORCH():
         :return: sample mean and standard deviation of occupancy
         """
         Xq = self.__sparse_features(Xq, None, self.rbf_kernel_type)
+        print(" Xq.shape:", Xq.shape)
 
         qw = torch.distributions.MultivariateNormal(self.mu, torch.diag(self.sig))
         w = qw.sample((nSamples,)).t()
@@ -420,18 +415,10 @@ class BHM_VELOCITY_PYTORCH:
         :param y: labels
         """
         # X = self.__sparse_features(X, self.sigma, self.rbf_kernel_type)
-
-        print("X.shape:", X.shape)
-        print("self.grid.shape:", self.grid.shape)
-        # X = X[:, :2]
-        # self.grid = self.grid[:, :2]
-        print("X.shape:", X.shape)
-        print("self.grid.shape:", self.grid.shape)
+        print(" Data shape:", X.shape)
         X = self.__sparse_features(X, self.rbf_kernel_type)
-
-        print("X.shape:", X.shape)
-
-
+        print(" Kernelized data shape:", X.shape)
+        print(" Hinge point shape:", self.grid.shape)
 
         # self.mu, self.sig = self.__calc_posterior(X, y)
         self.mu_x, self.sig_x = self.__calc_posterior(X, y_vx)
@@ -456,46 +443,46 @@ class BHM_VELOCITY_PYTORCH:
         """
 
         Xq = Xq.float()
-        print("Xq.shape:", Xq.shape)
+        #print(" Nq", Xq.shape)
         # Xq = Xq[:, :2]
-        print("Xq.shape:", Xq.shape)
+        #print("Xq.shape:", Xq.shape)
         # Xq = self.__sparse_features(Xq, None, self.rbf_kernel_type)
+        print(" Query data shape:", Xq.shape)
         Xq = self.__sparse_features(Xq, self.rbf_kernel_type)#.double()
-        print("Xq.shape:", Xq.shape)
+        print(" Kernelized query data shape:", Xq.shape)
         # exit()
 
         # mu_a = Xq.mm(self.mu.reshape(-1, 1)).squeeze()
         # sig2_inv_a = 1/self.beta + Xq.mm(self.sig).mm(Xq.t())
 
-        print("self.beta:", self.beta)
-
-        print("Xq.shape:", Xq.shape)
-        print("self.mu_x.shape:", self.mu_x.shape)
-        print("self.mu_x.reshape(-1, 1).shape:", self.mu_x.reshape(-1, 1).shape)
+        #print("self.beta:", self.beta)
+        #print("Xq.shape:", Xq.shape)
+        #print("self.mu_x.shape:", self.mu_x.shape)
+        #print("self.mu_x.reshape(-1, 1).shape:", self.mu_x.reshape(-1, 1).shape)
 
         mu_a_x = Xq.mm(self.mu_x.reshape(-1, 1))#.squeeze()
 
-        print("Here1")
-        print("mu_a_x.shape:", mu_a_x.shape)
+        #print("Here1")
+        #print("mu_a_x.shape:", mu_a_x.shape)
 
-        print("self.sig_x.shape:", self.sig_x.shape)
-        print("1/self.beta:", 1/self.beta)
-        print("Xq.t().shape:", Xq.t().shape)
+        #print("self.sig_x.shape:", self.sig_x.shape)
+        #print("1/self.beta:", 1/self.beta)
+        #print("Xq.t().shape:", Xq.t().shape)
 
         sig2_inv_a_x = 1/self.beta + Xq.mm(self.sig_x).mm(Xq.t())
 
-        print("Here2")
+        #print("Here2")
 
         mu_a_y = Xq.mm(self.mu_y.reshape(-1, 1))#.squeeze()
-        print("Here3")
+        #print("Here3")
         sig2_inv_a_y = 1/self.beta + Xq.mm(self.sig_y).mm(Xq.t())
-        print("Here4")
+        #print("Here4")
 
         mu_a_z = Xq.mm(self.mu_z.reshape(-1, 1))#.squeeze()
-        print("Here5")
+        #print("Here5")
         sig2_inv_a_z = 1/self.beta + Xq.mm(self.sig_z).mm(Xq.t())
 
-        print("Here6")
+        #print("Here6")
         # exit()
 
 
