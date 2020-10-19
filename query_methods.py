@@ -37,8 +37,7 @@ def load_mdl(args, path, type):
         model.updateMuSig(model_params['mu'], model_params['sig'])
 
     elif type == 'BHM_VELOCITY_PYTORCH':
-        print("Loading velocity model")
-
+        #print(" Loading velocity model")
         if args.likelihood_type == "gamma":
             model = BHM_VELOCITY_PYTORCH(
                 gamma=args.gamma,
@@ -163,11 +162,11 @@ def query_regression(args, cell_max_min, X, y_occupancy, g, framei):
 
 def query_velocity(args, X, y_vx, y_vy, y_vz, partitions, cell_resolution, cell_max_min, framei):
     bhm_velocity_mdl = load_mdl(args, 'velocity/{}_f{}'.format(args.save_model_path, framei), 'BHM_VELOCITY_PYTORCH')
-    print("Querying velocity BHM ...")
+    #print(" Querying velocity BHM ...")
 
     if args.q_resolution[0] <= 0 and args.q_resolution[1] <= 0 and args.q_resolution[2] <= 0:
         #if all q_res are non-positive, then query input = X
-        print("Query data is the same as input data")
+        print(" Query data is the same as input data")
         Xq_mv = X
     elif args.q_resolution[0] <= 0 or args.q_resolution[1] <= 0 or args.q_resolution[2] <= 0:
         #if at least one q_res is non-positive, then

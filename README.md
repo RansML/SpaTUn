@@ -62,3 +62,8 @@ Carla radar dataset in /velocity1/radar_carla_test1_frame_250.csv:
 ```
 python spatun.py --config velocity1_gauss
 ```
+
+For Kyle and Ransalu
+```
+python spatun.py --config kyle_ransalu/1_toy1_vel --mode tqp
+```

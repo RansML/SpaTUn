@@ -43,7 +43,7 @@ def save_mdl(args, model, path):
             }, './mdls/regression/{}'.format(path)
         )
     elif mdl_type == "BHM_VELOCITY_PYTORCH": ###===###
-        print(" Saving in ./mdls/velocity/...")
+        print(" Saving as ./mdls/velocity/{}".format(path))
         if not os.path.isdir("./mdls/velocity/"):
             os.makedirs('./mdls/velocity/')
 

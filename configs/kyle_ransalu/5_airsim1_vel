@@ -1,20 +1,20 @@
 {
-  "dataset_path": "./datasets/nuscenes/samples/normalized/RADAR_FRONT/n008-2018-08-01-15-16-36-0400__RADAR_FRONT__1533151603555991",
-  "plot_title": "nuscenes_gauss",
-  "surface_threshold": -1,
+  "dataset_path": "./datasets/kyle_ransalu/5_airsim/5_airsim1/5_airsim1_vel",
+  "plot_title": "5_airsim1_vel",
+  "surface_threshold": [-30,30],
   "num_frames": 1,
   "model_type": "velocity",
   "likelihood_type":"gaussian",
   "config": "",
-  "save_config": "./astyx_gauss",
+  "save_config": "./kyle_ransalu/5_airsim1_vel",
   "q_resolution": [
-    -0.02,
-    -0.02,
-    -0.02,
-    0.2
+    -0.05,
+    -0.05,
+    -0.05,
+    1.63
   ],
   "gamma": [
-    1
+    200
   ],
   "h_res": [
     0.2,
@@ -28,14 +28,14 @@
     1
   ],
   "area_min": [
-    -1,
-    -1,
-    -1
+    -0.03,
+    -3.8,
+    -0.1
   ],
   "area_max": [
-    1,
-    1,
-    1
+    2.4,
+    0.1,
+    2.2
   ],
   "partition_bleed": 0.25,
   "occupancy_plot_type": "scatter"

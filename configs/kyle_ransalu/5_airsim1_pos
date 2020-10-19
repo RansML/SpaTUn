@@ -1,25 +1,25 @@
 {
-  "dataset_path": "./datasets/jfk/txyzv3_vel",
-  "plot_title": "jfk_txyzv3_vel",
-  "surface_threshold": [-500,500],
+  "dataset_path": "./datasets/kyle_ransalu/5_airsim/5_airsim1/5_airsim1_pos",
+  "plot_title": "5_airsim1_pos",
+  "surface_threshold": [-30,30],
   "num_frames": 1,
   "model_type": "velocity",
   "likelihood_type":"gaussian",
   "config": "",
-  "save_config": "./jfk_txyzv3_vel",
+  "save_config": "./kyle_ransalu/5_airsim1_pos",
   "q_resolution": [
-    0.2,
-    0.2,
-    -0.2,
-    10
+    -0.05,
+    -0.05,
+    -0.05,
+    1.63
   ],
   "gamma": [
-    1
+    200
   ],
   "h_res": [
-    0.3,
-    0.3,
-    0.3
+    0.2,
+    0.2,
+    0.2
   ],
   "kernel_type": "rbf",
   "num_partitions": [
@@ -28,14 +28,14 @@
     1
   ],
   "area_min": [
-    -2,
-    -2,
-    0
+    -0.03,
+    -3.8,
+    -0.1
   ],
   "area_max": [
-    2,
-    2,
-    12
+    2.4,
+    0.1,
+    2.2
   ],
   "partition_bleed": 0.25,
   "occupancy_plot_type": "scatter"
