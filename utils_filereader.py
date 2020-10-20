@@ -107,9 +107,9 @@ def read_frame(args, framei, fn_train, cell_max_min):
     cell_max_min_segments = get3DPartitions(args, tuple(cell_max_min), args.num_partitions[0], args.num_partitions[1], args.num_partitions[2])
     return g, X, y_occupancy, sigma, cell_max_min_segments
 
-def read_frame_velocity(args, framei, fn_train, cell_max_min):
-    print(' Reading '+fn_train+'.csv...')
-    g = pd.read_csv(fn_train+'.csv', delimiter=',')
+def read_frame_velocity(args, framei, fn, cell_max_min):
+    print(' Reading '+fn+'.csv...')
+    g = pd.read_csv(fn+'.csv', delimiter=',')
     g = g.loc[np.isclose(g['t'],framei)].values[:, 1:]
 
     # g = torch.tensor(g, dtype=torch.double)

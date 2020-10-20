@@ -141,43 +141,46 @@ def plot():
 # ==============================================================================
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--mode', type=str, help='tqp: Train Query and Plot, to: Train only, qo: Query only, po: Plot only')
 
-    # Training arguments
-    parser.add_argument('--dataset_path', type=str, help='Path to dataset')
+    # Settings Arguments
+    parser.add_argument('--mode', type=str, help='tqp: Train Query and Plot, to: Train only, qo: Query only, po: Plot only')
     parser.add_argument('--num_frames', type=int, help='Number of data frames')
     parser.add_argument('--config', type=str, help='Path to the config to load relative to the config folder')
     parser.add_argument('--save_config', type=str, help='Saves the argparse config to path if set relative to the config folder')
-    parser.add_argument('--save_model_path', type=str, help='Path to save each model \
-        (i.e. save_model_path is set to \"toy3_run0\", then the model at partition 1, frame 1 would save to \
-        mdls/occupancy/toy3_run0_f1_p1)'
-    )
-    parser.add_argument('--save_query_data_path', type=str, help='Path save each set of queried data \
-        (i.e. save_model_path is set to \"toy3_run0\" and the model type is set to occupancy, \
-        then the model at frame 1 would save to query_data/occupancy/toy3_run0_f1_p1)'
-    )
 
-    # BHM Arguments
-    parser.add_argument('--q_resolution', nargs=3, type=float, help='X Y Z Q-resolution (3 values). If any value is negative, a 4th value should be provided to slice the corresponding axis. If all negative, X_query=X_train.')
+    # Train Arguments
+    parser.add_argument('--dataset_path', type=str, help='Path to dataset')
+    parser.add_argument('--model_type', type=str, help='Model type (occupancy vs regression)')
+    parser.add_argument('--likelihood_type', type=str, help='Likelihood type (Gamma, Gaussian)')
+    parser.add_argument('--kernel_type', type=str, help='Type of RBF kernel: Convolution (conv), Wasserstein (wass)')
     parser.add_argument('--gamma', nargs='+', type=float, help='X Y Z Gamma (1-3 values)')
     parser.add_argument('--h_res', nargs=3, type=int, help='X Y Z hinge point resolution (3 values)')
     parser.add_argument('--num_partitions', nargs=3, type=int, help='X Y Z number of partitions per axis (3 values)')
     parser.add_argument('--partition_bleed', type=float, help='Amount of bleed between partitions for plot stitching')
     parser.add_argument('--area_min', nargs=3, type=int, help='X Y Z minimum coordinates in bounding box (3 values)')
     parser.add_argument('--area_max', nargs=3, type=int, help='X Y Z maximum coordinates in bounding box (3 values)')
-    parser.add_argument('--kernel_type', type=str, help='Type of RBF kernel: Convolution (conv), Wasserstein (wass)')
-    parser.add_argument('--occupancy_plot_type', type=str, help='Plot occupancy as scatter or volumetric plot')
+    parser.add_argument('--save_model_path', type=str, help='Path to save each model \
+        (i.e. save_model_path is set to \"toy3_run0\", then the model at partition 1, frame 1 would save to \
+        mdls/occupancy/toy3_run0_f1_p1)'
+    )
+
+    # Query Arguments
+    parser.add_argument('--q_resolution', nargs=3, type=float, help='X Y Z Q-resolution (3 values). If any value is\
+        negative, a 4th value should be provided to slice the corresponding axis. If all negative, X_query=X_train.')
+    parser.add_argument('--eval_path', type=str, help='Path of the evaluation dataset')
+    parser.add_argument('--eval', type=int, help='1=evaluate metrics, 0, otherwise. Use data in --eval_path, if given.')
+    parser.add_argument('--save_query_data_path', type=str, help='Path save each set of queried data \
+        (i.e. save_model_path is set to \"toy3_run0\" and the model type is set to occupancy, \
+        then the model at frame 1 would save to query_data/occupancy/toy3_run0_f1_p1)'
+    )
 
     # Plot Arguments
-    parser.add_argument('--plot_title', type=str, help='Name to each frame plot')
+    parser.add_argument('--occupancy_plot_type', type=str, help='Plot occupancy as scatter or volumetric plot')
+    parser.add_argument('--plot_title', type=str, help='')
     parser.add_argument('--surface_threshold', nargs=2, type=float, help='Minimum threshold to show surface prediction on plot. Min or [Min, Max]')
-    parser.add_argument('--model_type', type=str, help='Plot type (occupancy vs regression)')
-    parser.add_argument('--likelihood_type', type=str, help='Likelihood type (Gamma, Gaussian)')
 
     args = parser.parse_args()
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-
-    #print("\nargs.save_model_path:", args.save_model_path)
 
     # Set arguments according to the following Priority (High->Low):
     # 1:CL provided arguments, 2: config provided arguments, 3:default arguments

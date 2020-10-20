@@ -497,8 +497,8 @@ class BHM_PLOTTER():
         )
 
         # calc error - possible only when Xq_mv = X
-        if self.args.q_resolution[0] <= 0 and self.args.q_resolution[1] <= 0 and self.args.q_resolution[2] <= 0:
-            print(" RMSE:", torch.sqrt(torch.mean((y_vy - mean_y)**2)).item())
+        #if self.args.q_resolution[0] <= 0 and self.args.q_resolution[1] <= 0 and self.args.q_resolution[2] <= 0:
+        #    print(" RMSE:", torch.sqrt(torch.mean((y_vy - mean_y)**2)).item())
 
         # filter by surface threshold
         print(" Surface_thresh: ", self.surface_threshold)
@@ -569,8 +569,8 @@ class BHM_PLOTTER():
         )
 
         # calc error - possible only when Xq_mv = X
-        if self.args.q_resolution[0] <= 0 and self.args.q_resolution[1] <= 0 and self.args.q_resolution[2] <= 0:
-            print(" RMSE:", torch.sqrt(torch.mean((y_vy - mean_y)**2)).item())
+        #if self.args.q_resolution[0] <= 0 and self.args.q_resolution[1] <= 0 and self.args.q_resolution[2] <= 0:
+        #    print(" RMSE:", torch.sqrt(torch.mean((y_vy - mean_y)**2)).item())
 
         # filter by surface threshold
         print(" Surface_thresh: ", self.surface_threshold)

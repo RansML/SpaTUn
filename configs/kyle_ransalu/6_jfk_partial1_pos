@@ -1,5 +1,7 @@
 {
-  "dataset_path": "./datasets/kyle_ransalu/6_jfk/6_jfk_partial1_pos",
+  "dataset_path": "./datasets/kyle_ransalu/6_jfk/6_jfk_partial1_pos_train",
+  "eval_path": "./datasets/kyle_ransalu/6_jfk/6_jfk_partial1_pos_test",
+  "eval": 1,
   "plot_title": "6_jfk_partial1_pos",
   "surface_threshold": [-500,500],
   "num_frames": 1,

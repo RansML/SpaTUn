@@ -1,5 +1,7 @@
 {
-  "dataset_path": "./datasets/kyle_ransalu/3_astyx/3_astyx1/normalized/000002",
+  "dataset_path": "./datasets/kyle_ransalu/3_astyx/3_astyx1/normalized/000002_train",
+  "eval_path": "./datasets/kyle_ransalu/3_astyx/3_astyx1/normalized/000002_test",
+  "eval": 1,
   "plot_title": "3_astyx1_vel",
   "surface_threshold": [-10, 10],
   "num_frames": 1,

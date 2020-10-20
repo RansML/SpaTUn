@@ -1,5 +1,7 @@
 {
-  "dataset_path": "./datasets/kyle_ransalu/2_carla/2_carla1_frame_250",
+  "dataset_path": "./datasets/kyle_ransalu/2_carla/2_carla1_frame_250_train",
+  "eval_path": "./datasets/kyle_ransalu/2_carla/2_carla1_frame_250_test",
+  "eval": 1,
   "plot_title": "2_carla1_frame_250",
   "surface_threshold": [-100, 100],
   "num_frames": 1,

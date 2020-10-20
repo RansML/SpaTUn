@@ -2,7 +2,7 @@
   "mode": "tqp",
   "dataset_path": "./datasets/toy/toy",
   "plot_title": "",
-  "surface_threshold": -0,
+  "surface_threshold": [-10000,10000],
   "num_frames": 1,
   "model_type": "occupancy",
   "config": "",
@@ -39,5 +39,7 @@
   "partition_bleed": 0.25,
   "occupancy_plot_type": "scatter",
   "save_model_path": "tmp",
-  "save_query_data_path": "tmp"
+  "save_query_data_path": "tmp",
+  "eval_path": "",
+  "eval": 1
 }

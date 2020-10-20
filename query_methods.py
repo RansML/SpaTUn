@@ -7,6 +7,8 @@ import torch
 import numpy as np
 
 from bhmtorch_cpu import BHM3D_PYTORCH, BHM_REGRESSION_PYTORCH, BHM_VELOCITY_PYTORCH
+from utils_filereader import read_frame_velocity
+from utils_metrics import calc_scores_velocity
 
 
 def load_mdl(args, path, type):
@@ -66,7 +68,7 @@ def load_mdl(args, path, type):
     else:
         raise ValueError("Unknown model type: \"{}\"".format(mdl_type))
     # model.updateMuSig(model_params['mu'], model_params['sig'])
-    return model
+    return model, model_params['train_time']
 
 
 def save_query_data(data, path):
@@ -161,13 +163,19 @@ def query_regression(args, cell_max_min, X, y_occupancy, g, framei):
     save_query_data((meanVarPlot, filtered[:,:3], framei, cell_max_min), 'regression/{}_f{}'.format(args.save_query_data_path, framei))
 
 def query_velocity(args, X, y_vx, y_vy, y_vz, partitions, cell_resolution, cell_max_min, framei):
-    bhm_velocity_mdl = load_mdl(args, 'velocity/{}_f{}'.format(args.save_model_path, framei), 'BHM_VELOCITY_PYTORCH')
-    #print(" Querying velocity BHM ...")
+    bhm_velocity_mdl, train_time = load_mdl(args, 'velocity/{}_f{}'.format(args.save_model_path, framei), 'BHM_VELOCITY_PYTORCH')
 
-    if args.q_resolution[0] <= 0 and args.q_resolution[1] <= 0 and args.q_resolution[2] <= 0:
+    option = ''
+    if args.eval_path != '':
+        #if eval is True, test the query
+        print(" Query data from the test dataset")
+        Xq_mv, y_vx_true, y_vy_true, y_vz_true, _ = read_frame_velocity(args, framei, args.eval_path, cell_max_min)
+        option = args.eval_path
+    elif args.q_resolution[0] <= 0 and args.q_resolution[1] <= 0 and args.q_resolution[2] <= 0:
         #if all q_res are non-positive, then query input = X
         print(" Query data is the same as input data")
         Xq_mv = X
+        option = 'Train data'
     elif args.q_resolution[0] <= 0 or args.q_resolution[1] <= 0 or args.q_resolution[2] <= 0:
         #if at least one q_res is non-positive, then
         if args.q_resolution[0] <= 0: #x-slice
@@ -190,6 +198,7 @@ def query_velocity(args, X, y_vx, y_vy, y_vz, partitions, cell_resolution, cell_
                 )
             )
             Xq_mv = torch.stack([xx.flatten(), yy.flatten(), zz.flatten()], dim=1)
+            option = 'X slice at '.format(args.q_resolution[3])
         elif args.q_resolution[1] <= 0: #y-slice
             print("Query data is y={} slice ".format(args.q_resolution[3]))
             xx, yy, zz = torch.meshgrid(
@@ -210,6 +219,7 @@ def query_velocity(args, X, y_vx, y_vy, y_vz, partitions, cell_resolution, cell_
                 )
             )
             Xq_mv = torch.stack([xx.flatten(), yy.flatten(), zz.flatten()], dim=1)
+            option = 'Y slice at '.format(args.q_resolution[3])
         else: #z-slice
             print("Query data is z={} slice ".format(args.q_resolution[3]))
             xx, yy, zz = torch.meshgrid(
@@ -230,6 +240,7 @@ def query_velocity(args, X, y_vx, y_vy, y_vz, partitions, cell_resolution, cell_
                 )
             )
             Xq_mv = torch.stack([xx.flatten(), yy.flatten(), zz.flatten()], dim=1)
+            option = 'Z slice at '.format(args.q_resolution[3])
     else:
         #if not use the grid
         print("Query data is a 3D gird.")
@@ -251,28 +262,7 @@ def query_velocity(args, X, y_vx, y_vy, y_vz, partitions, cell_resolution, cell_
             )
         )
         Xq_mv = torch.stack([xx.flatten(), yy.flatten(), zz.flatten()], dim=1)
-
-    # xx, yy = torch.meshgrid(
-    #     torch.arange(
-    #         cell_max_min[0],
-    #         cell_max_min[1]+args.q_resolution[0],
-    #         args.q_resolution[0]
-    #     ),
-    #     torch.arange(
-    #         cell_max_min[2],
-    #         cell_max_min[3]+args.q_resolution[1],
-    #         args.q_resolution[1]
-    #     ),
-    # )
-    # Xq_mv = torch.stack([xx.flatten(), yy.flatten()], dim=1)
-
-    # xx, yy, zz = torch.meshgrid(
-    #     torch.arange(segi[0], segi[1], args.q_resolution[0]),
-    #     torch.arange(segi[2], segi[3], args.q_resolution[1]),
-    #     torch.arange(segi[4], segi[5], args.q_resolution[2])
-    # )
-    # Xq = torch.stack([xx.flatten(), yy.flatten(), zz.flatten()], dim=1)
-
+        option = '3D grid'
 
     time1 = time.time()
 
@@ -283,13 +273,15 @@ def query_velocity(args, X, y_vx, y_vy, y_vz, partitions, cell_resolution, cell_
     else:
         raise ValueError("Unsupported likelihood type: \"{}\"".format(args.likelihood_type))
 
-    print(' Total querying time={} s'.format(round(time.time()-time1, 2)))
-    # print("mean.shape:", mean.shape)
-    # print("Xq_mv.shape:", Xq_mv.shape)
-    # var = np.zeros((mean.shape[0], mean.shape[0]))
-    # print("var.shape:", var.shape)
-    # meanVarPlot = [Xq_mv, mean_x, mean_y, mean_z]
-    # print("Before save query data")
-    # save_query_data((meanVarPlot, X, framei, cell_max_min), 'velocity/{}_f{}'.format(args.save_query_data_path, framei))
-    save_query_data((X, y_vx, y_vy, y_vz, Xq_mv, mean_x, mean_y, mean_z, framei), 'velocity/{}_f{}'.format(args.save_query_data_path, framei))
-    # print("Done querying.")
+    query_time = time.time() - time1
+
+    print(' Total querying time={} s'.format(round(query_time, 2)))
+    save_query_data((X, y_vx, y_vy, y_vz, Xq_mv, mean_x, mean_y, mean_z, framei), \
+                    'velocity/{}_f{}'.format(args.save_query_data_path, framei))
+
+    if args.eval == 1:
+        axes = [('x', y_vx_true, mean_x, var_x), ('y', y_vy_true, mean_y, var_y), ('z', y_vz_true, mean_z, var_z)]
+        for axis, Xqi, mean, var in axes:
+            mdl_name = 'reports/' + args.plot_title + '_' + axis
+            calc_scores_velocity(mdl_name, option, Xqi.numpy(), mean.numpy().ravel(), predicted_var=\
+                np.diagonal(var.numpy()), train_time=train_time, query_time=query_time, save_report=True)

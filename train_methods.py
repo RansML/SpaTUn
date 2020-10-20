@@ -8,7 +8,7 @@ import numpy as np
 
 from bhmtorch_cpu import BHM3D_PYTORCH, BHM_REGRESSION_PYTORCH, BHM_VELOCITY_PYTORCH
 
-def save_mdl(args, model, path):
+def save_mdl(args, model, path, train_time):
     """
     @param model: BHM Module to save
     @param path (str): path relative to the mdl folder to save to
@@ -26,6 +26,7 @@ def save_mdl(args, model, path):
             'sig': model.sig,
             'grid': model.grid,
             'epsilon': model.epsilon,
+            'train_time': train_time,
             }, './mdls/occupancy/{}'.format(path)
         )
     elif mdl_type == 'BHM_REGRESSION_PYTORCH':
@@ -40,6 +41,7 @@ def save_mdl(args, model, path):
             'grid': model.grid,
             'alpha': model.alpha,
             'beta': model.beta,
+            'train_time': train_time,
             }, './mdls/regression/{}'.format(path)
         )
     elif mdl_type == "BHM_VELOCITY_PYTORCH": ###===###
@@ -54,6 +56,7 @@ def save_mdl(args, model, path):
                 "w_haty":model.w_haty,
                 "w_hatz":model.w_hatz,
                 "likelihood_type":model.likelihood_type,
+                'train_time': train_time,
                 }, "./mdls/velocity/{}".format(path)
             ) ###///###
         elif args.likelihood_type == "gaussian":
@@ -67,7 +70,8 @@ def save_mdl(args, model, path):
                 'grid': model.grid,
                 'alpha': model.alpha,
                 'beta': model.beta,
-                "likelihood_type":model.likelihood_type,
+                'likelihood_type': model.likelihood_type,
+                'train_time': train_time,
                 }, "./mdls/velocity/{}".format(path)
             )
         else:
@@ -106,7 +110,7 @@ def train_occupancy(args, partitions, cell_resolution, X, y, sigma, framei):
         t1 = time.time()
         bhm_mdl.fit(X, y)
         totalTime += (time.time()-t1)
-        save_mdl(args, bhm_mdl, '{}_f{}_p{}'.format(args.save_model_path, framei, i))
+        save_mdl(args, bhm_mdl, '{}_f{}_p{}'.format(args.save_model_path, framei, i), t1)
         del bhm_mdl
     print(' Total training time={} s'.format(round(totalTime, 2)))
     del sigma
@@ -147,7 +151,7 @@ def train_regression(args, alpha, beta, cell_resolution, cell_max_min, X, y_occu
     time1 = time.time()
     bhm_regression_mdl.fit(filtered[:,:2], filtered[:,2])
     print(' Total training time={} s'.format(round(time.time() - time1, 2)))
-    save_mdl(args, bhm_regression_mdl, '{}_f{}'.format(args.save_model_path, framei))
+    save_mdl(args, bhm_regression_mdl, '{}_f{}'.format(args.save_model_path, framei), time1)
     del bhm_regression_mdl, filtered, sigma
 
 def train_velocity(args, alpha, beta, X, y_vx, y_vy, y_vz, partitions, cell_resolution, cell_max_min, framei):
@@ -183,6 +187,7 @@ def train_velocity(args, alpha, beta, X, y_vx, y_vy, y_vz, partitions, cell_reso
 
     time1 = time.time()
     bhm_velocity_mdl.fit(X, y_vx, y_vy, y_vz, eps=0) # , y_vy, y_vz
-    print(' Total training time={} s'.format(round(time.time() - time1, 2)))
-    save_mdl(args, bhm_velocity_mdl, '{}_f{}'.format(args.save_model_path, framei))
+    train_time = time.time() - time1
+    print(' Total training time={} s'.format(round(train_time, 2)))
+    save_mdl(args, bhm_velocity_mdl, '{}_f{}'.format(args.save_model_path, framei), train_time)
     del bhm_velocity_mdl
