@@ -200,17 +200,30 @@ if __name__ == '__main__':
     assert len(args.gamma) <= 3, 'Cannot support gamma with greater than dimension 3.'
 
     fn_train, cell_max_min, cell_resolution = utils_filereader.format_config(args)
-    if args.mode == 'tqp' or args.mode == 't':
-        train(fn_train, cell_max_min, cell_resolution)
-    if args.mode == 'tqp' or args.mode == 'q':
-        query(fn_train, cell_max_min)
-    if args.mode == 'tqp' or args.mode == 'p':
-        plot()
-    if args.mode == 'tq':
-        train(fn_train, cell_max_min, cell_resolution)
-        query(fn_train, cell_max_min)
-    if args.mode == 'qp':
-        query(fn_train, cell_max_min)
-        plot()
+
+    global gamma_vals
+    gamma_vals = [0.01, 0.1, 0.5, 1, 5, 10, 100, 200, 300]
+    h_res_factor = [1, 1.5, 2, 4]
+    args.h_res_orig = args.h_res
+    for fi in h_res_factor:
+        for gi in gamma_vals:
+            args.gamma = [gi]
+            args.h_res = [args.h_res_orig[0]/fi, args.h_res_orig[1]/fi, args.h_res_orig[2]/fi]
+            args.report_notes = 'scale_factor={}; h_res={}; gamma={}'.format(fi, args.h_res, args.gamma)
+            print('\n=============================================')
+            print(args.report_notes)
+
+            if args.mode == 'tqp' or args.mode == 't':
+                train(fn_train, cell_max_min, cell_resolution)
+            if args.mode == 'tqp' or args.mode == 'q':
+                query(fn_train, cell_max_min)
+            if args.mode == 'tqp' or args.mode == 'p':
+                plot()
+            if args.mode == 'tq':
+                train(fn_train, cell_max_min, cell_resolution)
+                query(fn_train, cell_max_min)
+            if args.mode == 'qp':
+                query(fn_train, cell_max_min)
+                plot()
 
     print("Mission complete!\n\n")

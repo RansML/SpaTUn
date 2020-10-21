@@ -32,32 +32,33 @@ def cross_entropy(act, pred):
     ll = act*sp.log(pred) + sp.subtract(1,act)*sp.log(sp.subtract(1,pred))
     return -ll
 
-def neg_ms_log_loss(true_labels, predicted_mean, predicted_var):
+def mean_standardized_log_loss(true_labels, predicted_mean, predicted_var):
     """
     :param true_labels:
     :param predicted_mean:
     :param predicted_var:
-    :return: Neg mean squared log loss (neg the better)
+    :return: 0 for simple methods, negative for better methods (eq. 2.34 GPML book)
     """
-    predicted_var = predicted_var + np.finfo(float).eps #to avoid /0 and log(0)
-    smse = np.average(0.5*np.log(2*np.pi*predicted_var) + ((predicted_mean - true_labels)**2)/(2*predicted_var)) #TODO: check
-    return smse
+    predicted_var = predicted_var + 10e6*np.finfo(float).eps #to avoid /0 and log(0)
+    msll = np.average(0.5*np.log(2*np.pi*predicted_var) + ((predicted_mean - true_labels)**2)/(2*predicted_var))
+    msll *= -1
+    return msll
 
-def calc_scores_velocity(mdl_name, query_type, true, predicted, predicted_var=None, train_time=-1, query_time=-1, save_report=True):
+def calc_scores_velocity(mdl_name, query_type, true, predicted, predicted_var=None, train_time=-1, query_time=-1, save_report=True, notes=''):
     fn = mdl_name+ '.csv'
 
     rmse = np.sqrt(metrics.mean_squared_error(true, predicted))
-    smse = neg_ms_log_loss(true, predicted, predicted_var) #TODO - double check
+    msll = mean_standardized_log_loss(true, predicted, predicted_var)
 
-    print(' Metrics: RMSE={:.3f}, SMSE={:.3f}, train_time={:.3f}, query_time={:.3f}'.format(rmse, smse, train_time, query_time))
+    print(' Metrics: RMSE={:.3f}, MSLL={:.3f}, train_time={:.3f}, query_time={:.3f}'.format(rmse, msll, train_time, query_time))
     if save_report is True:
        if os.path.isfile(fn): # If the file already exists
            header = ''
        else:
-           header = 'Time, Tested on, RMSE, SMSE, Train time, Query time'
+           header = 'Time, Tested on, RMSE, MSLL, Train time, Query time, Notes'
        with open(fn,'ab') as f_handle: #try 'a'
-          np.savetxt(f_handle, np.array([[datetime.now(), query_type, rmse, smse, train_time, query_time]]), \
-                     delimiter=',', fmt='%s, %s, %.3f, %.3f, %.3f, %.3f', header=header, comments='')
+          np.savetxt(f_handle, np.array([[datetime.now(), query_type, rmse, msll, train_time, query_time, notes]]), \
+                     delimiter=',', fmt='%s, %s, %.3f, %.3f, %.3f, %.3f, %s', header=header, comments='')
 
 def calc_scores_occupancy(mdl_name, true, predicted, predicted_var=None, time_taken=-11, N_points=0, do_return=False,
                          save_report=True):

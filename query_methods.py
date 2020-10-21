@@ -280,8 +280,12 @@ def query_velocity(args, X, y_vx, y_vy, y_vz, partitions, cell_resolution, cell_
                     'velocity/{}_f{}'.format(args.save_query_data_path, framei))
 
     if args.eval == 1:
+        if hasattr(args, 'report_notes'):
+            notes = args.report_notes
+        else:
+            notes = ''
         axes = [('x', y_vx_true, mean_x, var_x), ('y', y_vy_true, mean_y, var_y), ('z', y_vz_true, mean_z, var_z)]
         for axis, Xqi, mean, var in axes:
             mdl_name = 'reports/' + args.plot_title + '_' + axis
             calc_scores_velocity(mdl_name, option, Xqi.numpy(), mean.numpy().ravel(), predicted_var=\
-                np.diagonal(var.numpy()), train_time=train_time, query_time=query_time, save_report=True)
+                np.diagonal(var.numpy()), train_time=train_time, query_time=query_time, save_report=True, notes=notes)

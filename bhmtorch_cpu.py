@@ -443,48 +443,18 @@ class BHM_VELOCITY_PYTORCH:
         """
 
         Xq = Xq.float()
-        #print(" Nq", Xq.shape)
-        # Xq = Xq[:, :2]
-        #print("Xq.shape:", Xq.shape)
-        # Xq = self.__sparse_features(Xq, None, self.rbf_kernel_type)
         print(" Query data shape:", Xq.shape)
         Xq = self.__sparse_features(Xq, self.rbf_kernel_type)#.double()
         print(" Kernelized query data shape:", Xq.shape)
-        # exit()
-
-        # mu_a = Xq.mm(self.mu.reshape(-1, 1)).squeeze()
-        # sig2_inv_a = 1/self.beta + Xq.mm(self.sig).mm(Xq.t())
-
-        #print("self.beta:", self.beta)
-        #print("Xq.shape:", Xq.shape)
-        #print("self.mu_x.shape:", self.mu_x.shape)
-        #print("self.mu_x.reshape(-1, 1).shape:", self.mu_x.reshape(-1, 1).shape)
 
         mu_a_x = Xq.mm(self.mu_x.reshape(-1, 1))#.squeeze()
-
-        #print("Here1")
-        #print("mu_a_x.shape:", mu_a_x.shape)
-
-        #print("self.sig_x.shape:", self.sig_x.shape)
-        #print("1/self.beta:", 1/self.beta)
-        #print("Xq.t().shape:", Xq.t().shape)
-
         sig2_inv_a_x = 1/self.beta + Xq.mm(self.sig_x).mm(Xq.t())
 
-        #print("Here2")
-
         mu_a_y = Xq.mm(self.mu_y.reshape(-1, 1))#.squeeze()
-        #print("Here3")
         sig2_inv_a_y = 1/self.beta + Xq.mm(self.sig_y).mm(Xq.t())
-        #print("Here4")
 
         mu_a_z = Xq.mm(self.mu_z.reshape(-1, 1))#.squeeze()
-        #print("Here5")
         sig2_inv_a_z = 1/self.beta + Xq.mm(self.sig_z).mm(Xq.t())
-
-        #print("Here6")
-        # exit()
-
 
         return mu_a_x, sig2_inv_a_x, mu_a_y, sig2_inv_a_y, mu_a_z, sig2_inv_a_z
 
