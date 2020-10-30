@@ -1,13 +1,28 @@
 import numpy as np
 import os
+from glob import glob
+from tqdm import tqdm
 from nuscenes.utils.data_classes import RadarPointCloud
 
-PCD_PATH = "../v1.0-mini/samples/RADAR_FRONT/n008-2018-08-01-15-16-36-0400__RADAR_FRONT__1533151603555991.pcd"
-FORMATTED_DATA_PATH = "/Users/khatch/Desktop/SISL/Bayesian Hilbert Project/Bayesian-Dynamics/datasets/nuscenes/samples/formatted/RADAR_FRONT/n008-2018-08-01-15-16-36-0400__RADAR_FRONT__1533151603555991.csv"
-NORMALIZED_DATA_PATH = "/Users/khatch/Desktop/SISL/Bayesian Hilbert Project/Bayesian-Dynamics/datasets/nuscenes/samples/normalized/RADAR_FRONT/n008-2018-08-01-15-16-36-0400__RADAR_FRONT__1533151603555991.csv"
-# PCD_PATH = "/Users/khatch/Desktop/SISL/Bayesian Hilbert Project/v1.0-mini/sweeps/RADAR_FRONT_LEFT/n015-2018-11-21-19-38-26+0800__RADAR_FRONT_LEFT__1542801007126139.pcd"
-# FORMATTED_DATA_PATH = "/Users/khatch/Desktop/SISL/Bayesian Hilbert Project/Bayesian-Dynamics/datasets/nuscenes/sweeps/formatted/RADAR_FRONT_LEFT/n015-2018-11-21-19-38-26+0800__RADAR_FRONT_LEFT__1542801007126139.csv"
-# NORMALIZED_DATA_PATH = "/Users/khatch/Desktop/SISL/Bayesian Hilbert Project/Bayesian-Dynamics/datasets/nuscenes/sweeps/normalized/RADAR_FRONT_LEFT/n015-2018-11-21-19-38-26+0800__RADAR_FRONT_LEFT__1542801007126139.csv"
+PCD_DIRS = "../../v1.0-mini/samples/RADAR_FRONT"
+# FORMATTED_DATA_DIR = "/Users/khatch/Desktop/SISL/Bayesian Hilbert Project/Bayesian-Dynamics/datasets/nuscenes/samples/formatted/RADAR_FRONT"
+# NORMALIZED_DATA_DIR = "/Users/khatch/Desktop/SISL/Bayesian Hilbert Project/Bayesian-Dynamics/datasets/nuscenes/samples/normalized/RADAR_FRONT"
+FORMATTED_DATA_DIR = "/Users/khatch/Desktop/SISL/Bayesian Hilbert Project/SpaTUn/datasets/kyle_ransalu/4_nuscenes/4_nuscenes1/samples/formatted/RADAR_FRONT"
+NORMALIZED_DATA_DIR = "/Users/khatch/Desktop/SISL/Bayesian Hilbert Project/SpaTUn/datasets/kyle_ransalu/4_nuscenes/4_nuscenes1/samples/formatted/RADAR_FRONT"
+
+def format_all_files(pcd_dirs, formatted_data_dir_path, normalized_data_dir_path):
+    radar_files = glob(os.path.join(pcd_dirs, "*.pcd"))
+    for radar_file in tqdm(radar_files, total=len(radar_files), desc="Formatting files"):
+        radar_name = get_name_from_radar_file(radar_file)
+        formatted_data_path = os.path.join(formatted_data_dir_path, radar_name + ".csv")
+        normalized_data_path = os.path.join(normalized_data_dir_path, radar_name + ".csv")
+        run_format(radar_file, formatted_data_path, normalized_data_path)
+    print("Done")
+
+
+def get_name_from_radar_file(radar_file):
+    return radar_file.split(".")[-2].split("/")[-1]
+
 
 def run_format(pcd_file, formatted_data_path, normalized_data_path):
     pcd = RadarPointCloud.from_file(pcd_file)
@@ -63,4 +78,5 @@ def run_format(pcd_file, formatted_data_path, normalized_data_path):
 
 
 if __name__ == "__main__":
-    run_format(PCD_PATH, FORMATTED_DATA_PATH, NORMALIZED_DATA_PATH)
+    # run_format(PCD_PATH, FORMATTED_DATA_PATH, NORMALIZED_DATA_PATH)
+    format_all_files(PCD_DIRS, FORMATTED_DATA_DIR, NORMALIZED_DATA_DIR)

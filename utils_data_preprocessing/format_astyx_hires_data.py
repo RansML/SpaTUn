@@ -1,17 +1,31 @@
 import numpy as np
+import os
+from glob import glob
+from tqdm import tqdm
 
 # UNOFORMATTED_DATA_FILE = "/home/khatch/Documents/Bayesian-Dynamics/datasets/radar_dataset_astyx_hires2019/radar_6455/000000.txt"
 # FORMATTED_DATA_PATH = "/home/khatch/Documents/Bayesian-Dynamics/datasets/radar_dataset_astyx_hires2019/formatted/000000.txt"
-UNOFORMATTED_DATA_FILE = "/Users/khatch/Desktop/SISL/Bayesian Hilbert Project/radar_dataset_astyx_hires2019/dataset_astyx_hires2019/dataset_astyx_hires2019/radar_6455/000047.txt"
-FORMATTED_DATA_PATH = "/Users/khatch/Desktop/SISL/Bayesian Hilbert Project/Bayesian-Dynamics/datasets/radar_dataset_astyx_hires2019/formatted/000047.csv"
-NORMALIZED_DATA_PATH = "/Users/khatch/Desktop/SISL/Bayesian Hilbert Project/Bayesian-Dynamics/datasets/radar_dataset_astyx_hires2019/normalized/000047.csv"
+# UNOFORMATTED_DATA_FILE = "/Users/khatch/Desktop/SISL/Bayesian Hilbert Project/radar_dataset_astyx_hires2019/dataset_astyx_hires2019/dataset_astyx_hires2019/radar_6455/000047.txt"
+# FORMATTED_DATA_PATH = "/Users/khatch/Desktop/SISL/Bayesian Hilbert Project/Bayesian-Dynamics/datasets/radar_dataset_astyx_hires2019/formatted/000047.csv"
+# NORMALIZED_DATA_PATH = "/Users/khatch/Desktop/SISL/Bayesian Hilbert Project/Bayesian-Dynamics/datasets/radar_dataset_astyx_hires2019/normalized/000047.csv"
+
+# UNOFORMATTED_DATA_DIR = "/Users/khatch/Desktop/SISL/Bayesian Hilbert Project/radar_dataset_astyx_hires2019/dataset_astyx_hires2019/dataset_astyx_hires2019/radar_6455"
+# FORMATTED_DATA_DIR = "/Users/khatch/Desktop/SISL/Bayesian Hilbert Project/Bayesian-Dynamics/datasets/radar_dataset_astyx_hires2019/formatted"
+# NORMALIZED_DATA_DIR = "/Users/khatch/Desktop/SISL/Bayesian Hilbert Project/Bayesian-Dynamics/datasets/radar_dataset_astyx_hires2019/normalized"
+UNOFORMATTED_DATA_DIR = "/Users/khatch/Desktop/SISL/Bayesian Hilbert Project/radar_dataset_astyx_hires2019/dataset_astyx_hires2019/dataset_astyx_hires2019/radar_6455"
+FORMATTED_DATA_DIR = "/Users/khatch/Desktop/SISL/Bayesian Hilbert Project/SpaTUn/datasets/kyle_ransalu/3_astyx/3_astyx1/formatted"
+NORMALIZED_DATA_DIR = "/Users/khatch/Desktop/SISL/Bayesian Hilbert Project/SpaTUn/datasets/kyle_ransalu/3_astyx/3_astyx1/normalized"
 
 
-"""
-Normalize the data
-"""
+def format_all_files(unformatted_data_dir, formatted_data_dir, normalized_data_dir):
+    unformatted_files = glob(os.path.join(unformatted_data_dir, "*.txt"))
+    for unformatted_file in tqdm(unformatted_files, total=len(unformatted_files), desc="Formatting"):
+        example_name = unformatted_file.split("/")[-1].split(".")[0]
+        formatted_data_path = os.path.join(formatted_data_dir, example_name + ".csv")
+        normalized_data_path = os.path.join(normalized_data_dir, example_name + ".csv")
+        format_file(unformatted_file, formatted_data_path, normalized_data_path)
 
-def run_format(unformatted_data_file, formatted_data_path, normalized_data_path):
+def format_file(unformatted_data_file, formatted_data_path, normalized_data_path):
     # unformatted_data = np.loadtxt(unformatted_data_file, delimiter=" ", skiprows=2)
     # print("unformatted_data:", unformatted_data)
     # print("unformatted_data.shape:", unformatted_data.shape)
@@ -91,4 +105,4 @@ def get_header(data_path):
         return header
 
 if __name__ == "__main__":
-    run_format(UNOFORMATTED_DATA_FILE, FORMATTED_DATA_PATH, NORMALIZED_DATA_PATH)
+    format_all_files(UNOFORMATTED_DATA_DIR, FORMATTED_DATA_DIR, NORMALIZED_DATA_DIR)
