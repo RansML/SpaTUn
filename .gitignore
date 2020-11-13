@@ -6,4 +6,4 @@ query_data/
 .idea
 /datasets/kyle_ransalu/6_jfk/*
 /reports/*
-*.DS_Store
+.DS_Store
