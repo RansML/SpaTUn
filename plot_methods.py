@@ -11,6 +11,11 @@ from bhmtorch_cpu import BHM3D_PYTORCH
 from bhmtorch_cpu import BHM_REGRESSION_PYTORCH
 from plotly.subplots import make_subplots
 
+plotly.io.orca.config.executable = "/home/khatch/anaconda3/envs/hilbert/bin/orca"
+# import plotly.io as pio
+# pio.orca.config.use_xvfb = True
+# plotly.io.orca.config.executable = "/home/khatch/Documents/orca-1.3.1.AppImage"
+
 # ==============================================================================
 # BHM Plotting Class
 # ==============================================================================
@@ -594,14 +599,15 @@ class BHM_PLOTTER():
                 # plot_args_data = ['circle', 5, 0.7, 0.3, y_vy.min().item(), y_vy.max().item()]
                 # plot_args_pred_mean = ['circle', 5, 0.7, 0.6, y_vy.min().item(), y_vy.max().item()]
                 self._plot_velocity_scatter(X.float(), y_v, fig, 1, col, plot_args_data)
-                self._plot_velocity_scatter(Xq_mv.float(), mean.float(), fig, 2, col, plot_args_pred_mean)
+                self._plot_velocity_scatter(Xq_mv.float(), mean.float(), fig, 2, col, plot_args_pred_mean) ###$$$###
+
 
         # update camera
         camera = dict(
             eye=dict(x=2.25, y=-2.25, z=1.25)
         )
         fig.layout.scene1.camera = camera
-        fig.layout.scene2.camera = camera
+        fig.layout.scene2.camera = camera ###$$$###
         fig.layout.scene3.camera = camera
         fig.layout.scene4.camera = camera
         fig.layout.scene5.camera = camera
@@ -619,6 +625,15 @@ class BHM_PLOTTER():
         filename = os.path.abspath('./plots/velocity/{}_frame{}.html'.format(self.plot_title, i))
         plotly.offline.plot(fig, filename=filename, auto_open=False)
         print(' Plot saved as '+filename)
+
+
+        pdf_filename = os.path.abspath('./plots/velocity/{}_frame{}.pdf'.format(self.plot_title, i))
+        fig.write_image(pdf_filename, width=1500, height=900)
+        print(' Plot also saved as ' + pdf_filename)
+
+        svg_filename = os.path.abspath('./plots/velocity/{}_frame{}.svg'.format(self.plot_title, i))
+        fig.write_image(svg_filename, width=1500, height=900)
+        print(' Plot also saved as ' + svg_filename)
 
     def plot_velocity_frame(self, X, y_vx, y_vy, y_vz, Xq_mv, mean_x, mean_y, mean_z, i):
         time1 = time.time()

@@ -1,7 +1,7 @@
 {
   "dataset_path": "./datasets/kyle_ransalu/1_toy/1_toy1_vel_train",
   "eval_path": "./datasets/kyle_ransalu/1_toy/1_toy1_vel_test",
-  "eval": 1,
+  "eval": 0,
   "plot_title": "1_toy1_vel",
   "surface_threshold": [-20,20],
   "num_frames": 1,
