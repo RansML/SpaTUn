@@ -32,7 +32,7 @@ def rbf_kernel_conv(X, Y, gamma, sigma, device=DEFAULT_DEVICE):
     det = (torch.det(torch.diag_embed(2*gamma*sigma+1))**(-0.5)).unsqueeze(-1)
     diff = X.unsqueeze(1)-Y
     p = torch.diag_embed((2*sigma+1/gamma)**(-1))
-    return det * torch.exp(-1 *((diff@p).view(N*M, 1, d)).bmm(diff.view(N*M, d, 1)).view(N,M))
+    return det * torch.exp(-1 *((diff@p).view(N*M, 1, d)).bmm(diff.reshape((N*M, d, 1))).reshape((N,M)))
 
 
 def rbf_kernel_wasserstein(X, Y, gamma, sigma=None, device=DEFAULT_DEVICE):

@@ -68,7 +68,7 @@ def load_mdl(args, path, type):
     else:
         raise ValueError("Unknown model type: \"{}\"".format(mdl_type))
     # model.updateMuSig(model_params['mu'], model_params['sig'])
-    return model, model_params['train_time']
+    return model #, model_params['train_time']
 
 
 def save_query_data(data, path):

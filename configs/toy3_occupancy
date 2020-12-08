@@ -4,6 +4,7 @@
   "surface_threshold": 0.4,
   "num_frames": 1,
   "model_type": "occupancy",
+  "likelihood_type":"gaussian",
   "config": "toy3_occupancy",
   "save_config": "toy3_occupancy",
   "q_resolution": [
