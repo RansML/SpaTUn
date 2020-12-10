@@ -645,3 +645,9 @@ class BHM_PLOTTER():
             self._plot_velocity_2by3(X, y_vx, y_vy, y_vz, Xq_mv, mean_x, mean_y, mean_z, i)
 
         print(' Total plotting time=%2f s' % (time.time()-time1))
+
+    #Create function to do different thresholding
+    #Execute based on config file
+    #Method 1: Everything above value displayed
+    #Method 2: Look at variance
+    #Method 3: Marching cubes
