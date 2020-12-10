@@ -34,6 +34,11 @@ Toy3 Dataset: Simple dataset with LIDAR hits along with adjustable uncertainty (
 python3 spatun.py --config toy3_occupancy
 ```
 
+bernoulli-surface Dataset: Dataset with samples on the mesh of a shell. The mesh is located in ply_files. To make a csv from sample hit points on the shell, run:
+```
+python3 make_csv.py ply_files/shell.ply datasets/bernoulli-surface/shell.csv
+```
+
 ### Sample 2D Gaussian (Regression) Configurations
 
 Toy Dataset: Simple dataset with LIDAR hits along with adjustable uncertainty (sigma). The dataset is located in datasets/toy/toy.csv. To run the sample, use:
