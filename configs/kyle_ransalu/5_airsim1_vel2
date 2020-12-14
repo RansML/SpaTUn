@@ -8,12 +8,13 @@
   "model_type": "velocity",
   "likelihood_type":"gaussian",
   "config": "",
-  "save_config": "./kyle_ransalu_tuned_dec/5_airsim1_vel",
+  "save_config": "./kyle_ransalu_tuned_dec/5_airsim1_vel2",
   "q_resolution": [
     0.1,
     0.1,
     0.1
   ],
+  "query_blocks":10,
   "gamma": [
     200
   ],
