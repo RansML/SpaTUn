@@ -41,5 +41,5 @@
   "save_model_path": "tmp",
   "save_query_data_path": "tmp",
   "eval_path": "",
-  "eval": 1
+  "eval": 0
 }
