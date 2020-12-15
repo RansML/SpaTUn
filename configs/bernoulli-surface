@@ -1,7 +1,7 @@
 {
   "dataset_path": "./datasets/bernoulli-surface/shell",
   "plot_title": "bernoulli-surface",
-  "surface_threshold": -999,
+  "surface_threshold": [-0.3, 0.3],
   "num_frames": 1,
   "model_type": "occupancy",
   "likelihood_type":"gaussian",
@@ -28,13 +28,13 @@
   "partition_bleed": 0.25,
   "area_min": [
     -2,
-    -1,
+    -2,
     -2
   ],
   "area_max": [
     2,
-    1.5,
-    1.5
+    2,
+    2
   ],
   "kernel_type": "rbf",
   "occupancy_plot_type": "volumetric"

@@ -37,10 +37,19 @@ class BHM_PLOTTER():
         """
         if self.occupancy_plot_type == 'volumetric':
             return ploti
-        joined = torch.cat((ploti[0], ploti[1].unsqueeze(-1)), dim=-1)
-        mask = (joined[:,3] >= self.surface_threshold) #+ (torch.rand_like(joined[:,3]) > self.plot_denoise)
-        filtered = joined[mask, :]
-        return filtered[:,:3], filtered[:,3]
+        
+        if isinstance(self.surface_threshold.type, ImportWarning):
+            joined = torch.cat((ploti[0], ploti[1].unsqueeze(-1)), dim=-1)
+            if len(self.surface_threshold) == 1:
+                mask = (joined[:,3] >= self.surface_threshold[0])
+                #mask = (joined[:,3] >= self.surface_threshold) #+ (torch.rand_like(joined[:,3]) > self.plot_denoise)
+            else:
+                min_mask = joined[:,3] >= self.surface_threshold[0]
+                max_mask = joined[:,3] <= self.surface_threshold[1]
+                mask = torch.logical_and(min_mask, max_mask)
+            
+            filtered = joined[mask, :]
+            return filtered[:,:3], filtered[:,3]
 
     def plot_lidar_hits(self, X, y, fig):
         """
@@ -91,7 +100,7 @@ class BHM_PLOTTER():
         vars = torch.zeros(1)
         for ploti in toPlot:
             var = ploti[2]
-            if self.surface_threshold > 0:
+            if self.surface_threshold[0] > 0:
                 ploti = self.filter_predictions(ploti)
             Xq, yq = ploti[0], ploti[1]
             if Xq.shape[0] <= 1: continue
@@ -116,14 +125,14 @@ class BHM_PLOTTER():
                     opacity=0.05,
                     surface_count=40,
                     colorscale="Jet",
-                    opacityscale=[[0,0],[self.surface_threshold,0],[1,1]],
+                    opacityscale=[[0,0],[self.surface_threshold[0],0],[1,1]],
                     colorbar=dict(
                         x=0.65,
                         len=colorbar_len,
                         y=colorbar_y
                     ),
                     cmax=1,
-                    cmin=self.surface_threshold,
+                    cmin=self.surface_threshold[0],
                 ),
                 row=1,
                 col=2
@@ -410,7 +419,7 @@ class BHM_PLOTTER():
         # print("ploti[1].unsqueeze(-1).shape:", ploti[1].unsqueeze(-1).shape)
         # print("joined.shape:", joined.shape)
         # exit()
-        mask = (joined[:,3] >= surface_threshold) #+ (torch.rand_like(joined[:,3]) > self.plot_denoise)
+        mask = (joined[:,3] >= surface_threshold[0]) #+ (torch.rand_like(joined[:,3]) > self.plot_denoise)
         # mask = (joined[:,3] >= self.surface_threshold) #+ (torch.rand_like(joined[:,3]) > self.plot_denoise)
         filtered = joined[mask, :]
         # print("mask:", mask)
