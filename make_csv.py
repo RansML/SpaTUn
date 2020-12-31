@@ -6,6 +6,12 @@ from random import sample
 import sys
 
 def make_csv(input_file_path, output_file_path):
+    """
+    @params: input_file_path
+    @params: output_file_path
+
+    Given input file path for a ply file, save a csv file of vertices and values at the output file path
+    """
     plydata = PlyData.read(input_file_path)
 
     #How much to perturb to get inner and outer data
