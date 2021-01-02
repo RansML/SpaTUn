@@ -155,6 +155,7 @@ if __name__ == '__main__':
     parser.add_argument('--kernel_type', type=str, help='Type of RBF kernel: Convolution (conv), Wasserstein (wass)')
     parser.add_argument('--gamma', nargs='+', type=float, help='X Y Z Gamma (1-3 values)')
     parser.add_argument('--h_res', nargs=3, type=int, help='X Y Z hinge point resolution (3 values)')
+    parser.add_argument('--hinge-type', type=str, help='Hinge point type (grid or hit_locations)')
     parser.add_argument('--num_partitions', nargs=3, type=int, help='X Y Z number of partitions per axis (3 values)')
     parser.add_argument('--partition_bleed', type=float, help='Amount of bleed between partitions for plot stitching')
     parser.add_argument('--area_min', nargs=3, type=int, help='X Y Z minimum coordinates in bounding box (3 values)')

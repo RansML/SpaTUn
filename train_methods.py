@@ -8,6 +8,20 @@ import numpy as np
 
 from bhmtorch_cpu import BHM3D_PYTORCH, BHM_REGRESSION_PYTORCH, BHM_VELOCITY_PYTORCH
 
+def make_hinge_pts(X, y):
+    """
+    @params: X (float32 tensor), 3d coordinate
+    @params: y (float32 tensor), occupancy value
+
+    @returns: float32 tensor of hinge points at hit locations
+    """
+    hinge_pts = []
+    for i in range(y.shape[0]):
+        if y[i] == 0:
+            hinge_pts.append(X[i])
+    return torch.stack(hinge_pts)
+
+    
 def save_mdl(args, model, path, train_time):
     """
     @param model: BHM Module to save
@@ -95,11 +109,17 @@ def train_occupancy(args, partitions, cell_resolution, X, y, sigma, framei):
     """
     totalTime = 0
     num_segments = len(partitions)
+    if args.hinge_type == "hit_locations":
+        grid = make_hinge_pts(X, y)
+    else:
+        grid = None
+        
+
     for i, segi in enumerate(partitions):
         print(' Training on segment {} of {}...'.format(i+1, num_segments))
         bhm_mdl = BHM3D_PYTORCH(
             gamma=args.gamma,
-            grid=None,
+            grid=grid,
             cell_resolution=cell_resolution,
             cell_max_min=segi,
             X=X,
