@@ -269,7 +269,7 @@ def query_velocity(args, X, y_vx, y_vy, y_vz, partitions, cell_resolution, cell_
     if args.likelihood_type == "gamma":
         mean_x, mean_y, mean_z = bhm_velocity_mdl.predict(Xq_mv)
     elif args.likelihood_type == "gaussian":
-        mean_x, var_x, mean_y, var_y, mean_z, var_z = bhm_velocity_mdl.predict(Xq_mv)
+        mean_x, var_x, mean_y, var_y, mean_z, var_z = bhm_velocity_mdl.predict(Xq_mv, args.query_blocks)
     else:
         raise ValueError("Unsupported likelihood type: \"{}\"".format(args.likelihood_type))
 
