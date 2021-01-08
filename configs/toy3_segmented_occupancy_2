@@ -1,0 +1,18 @@
+{
+  "dataset_path": "./datasets/toy3/toy3",
+  "plot_title": "toy3",
+  "surface_threshold": 0.7,
+  "num_frames": 1,
+  "model_type": "occupancy",
+  "config": "",
+  "save_config": "toy3_segmented_occupancy",
+  "q_resolution": [1, 1, 0.25],
+  "gamma": [0.1],
+  "h_res": [10, 10, 5],
+  "num_partitions": [2, 2, 2],
+  "area_min": [-80, 0, -4],
+  "area_max": [80, 80, 12],
+  "kernel_type": "wass",
+  "partition_bleed": 0.25,
+  "occupancy_plot_type": "scatter"
+}

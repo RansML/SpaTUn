@@ -1,0 +1,44 @@
+{
+  "dataset_path": "./datasets/kyle_ransalu/4_nuscenes/4_nuscenes1/samples/normalized/RADAR_FRONT/n008-2018-08-01-15-16-36-0400__RADAR_FRONT__1533151603555991_train",
+  "eval_path": "./datasets/kyle_ransalu/4_nuscenes/4_nuscenes1/samples/normalized/RADAR_FRONT/n008-2018-08-01-15-16-36-0400__RADAR_FRONT__1533151603555991_test",
+  "eval": 1,
+  "plot_title": "4_nuscenes1_vel",
+  "surface_threshold": [-10,10],
+  "num_frames": 1,
+  "model_type": "velocity",
+  "likelihood_type":"gaussian",
+  "config": "",
+  "save_config": "./kyle_ransalu/4_nuscenes1_vel",
+  "q_resolution": [
+    -0.02,
+    -0.02,
+    -0.02,
+    0.2
+  ],
+  "gamma": [
+    1
+  ],
+  "h_res": [
+    0.2,
+    0.2,
+    0.2
+  ],
+  "kernel_type": "rbf",
+  "num_partitions": [
+    1,
+    1,
+    1
+  ],
+  "area_min": [
+    -1,
+    -1,
+    -1
+  ],
+  "area_max": [
+    1,
+    1,
+    1
+  ],
+  "partition_bleed": 0.25,
+  "occupancy_plot_type": "scatter"
+}

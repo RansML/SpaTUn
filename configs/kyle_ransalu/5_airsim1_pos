@@ -1,0 +1,44 @@
+{
+  "dataset_path": "./datasets/kyle_ransalu/5_airsim/5_airsim1/5_airsim1_pos_train",
+  "eval_path": "./datasets/kyle_ransalu/5_airsim/5_airsim1/5_airsim1_pos_test",
+  "eval": 1,
+  "plot_title": "5_airsim1_pos",
+  "surface_threshold": [-30,30],
+  "num_frames": 1,
+  "model_type": "velocity",
+  "likelihood_type":"gaussian",
+  "config": "",
+  "save_config": "./kyle_ransalu/5_airsim1_pos",
+  "q_resolution": [
+    -0.05,
+    -0.05,
+    -0.05,
+    1.63
+  ],
+  "gamma": [
+    200
+  ],
+  "h_res": [
+    0.2,
+    0.2,
+    0.2
+  ],
+  "kernel_type": "rbf",
+  "num_partitions": [
+    1,
+    1,
+    1
+  ],
+  "area_min": [
+    -0.03,
+    -3.8,
+    -0.1
+  ],
+  "area_max": [
+    2.4,
+    0.1,
+    2.2
+  ],
+  "partition_bleed": 0.25,
+  "occupancy_plot_type": "scatter"
+}

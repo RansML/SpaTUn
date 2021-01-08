@@ -1,0 +1,18 @@
+{
+  "dataset_path": "./datasets/ahmed/ransvid1_600",
+  "plot_title": "ahmed_ransvid1_600",
+  "surface_threshold": 0.7,
+  "num_frames": 1,
+  "plot_type": "occupancy",
+  "occupancy_plot_type": "scatter",
+  "config": "",
+  "save_config": "",
+  "q_resolution": [15, 15, 15],
+  "gamma": [0.001, 0.001, 0.001],
+  "h_res": [50, 50, 50],
+  "num_partitions": [5, 5, 1],
+  "area_min": [0, -1000, -300],
+  "area_max": [1000, 0, 0],
+  "kernel_type": "",
+  "partition_bleed": 1
+}

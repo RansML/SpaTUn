@@ -1,0 +1,44 @@
+{
+  "dataset_path": "./datasets/kyle_ransalu/6_jfk/6_jfk_partial1_pos_train",
+  "eval_path": "./datasets/kyle_ransalu/6_jfk/6_jfk_partial1_pos_test",
+  "eval": 1,
+  "plot_title": "6_jfk_partial1_pos",
+  "surface_threshold": [-500,500],
+  "num_frames": 1,
+  "model_type": "velocity",
+  "likelihood_type":"gaussian",
+  "config": "",
+  "save_config": "./kyle_ransalu/6_jfk_partial1_pos",
+  "q_resolution": [
+    0.2,
+    0.2,
+    -0.2,
+    2
+  ],
+  "gamma": [
+    1
+  ],
+  "h_res": [
+    0.3,
+    0.3,
+    1.0
+  ],
+  "kernel_type": "rbf",
+  "num_partitions": [
+    1,
+    1,
+    1
+  ],
+  "area_min": [
+    -2,
+    -2,
+    0
+  ],
+  "area_max": [
+    2,
+    2,
+    12
+  ],
+  "partition_bleed": 0.25,
+  "occupancy_plot_type": "scatter"
+}

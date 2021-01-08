@@ -1,0 +1,44 @@
+{
+  "dataset_path": "./datasets/kyle_ransalu/2_carla/2_carla1_frame_250_train",
+  "eval_path": "./datasets/kyle_ransalu/2_carla/2_carla1_frame_250_test",
+  "eval": 1,
+  "plot_title": "2_carla1_frame_250",
+  "surface_threshold": [-100, 100],
+  "num_frames": 1,
+  "model_type": "velocity",
+  "likelihood_type":"gaussian",
+  "config": "",
+  "save_config": "./kyle_ransalu/2_carla1_vel",
+  "q_resolution": [
+    -0.02,
+    -0.02,
+    -0.02,
+    0.2
+  ],
+  "gamma": [
+    1
+  ],
+  "h_res": [
+    0.1,
+    2,
+    0.1
+  ],
+  "kernel_type": "rbf",
+  "num_partitions": [
+    1,
+    1,
+    1
+  ],
+  "area_min": [
+    -0.25,
+    0,
+    -0.2
+  ],
+  "area_max": [
+    0.25,
+    80,
+    0.2
+  ],
+  "partition_bleed": 0.25,
+  "occupancy_plot_type": "scatter"
+}
