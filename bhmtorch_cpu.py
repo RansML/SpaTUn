@@ -1,6 +1,6 @@
 """
 # 3D Bayesian Hilbert Maps with pytorch
-# Ransalu Senanayake and Jason Zheng
+# Ransalu Senanayake, Jason Zheng, and Kyle Hatch
 """
 import math
 import numpy as np

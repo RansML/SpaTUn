@@ -18,9 +18,9 @@ def format_config(args):
 
     fn_train = os.path.abspath(args.dataset_path)
     cell_resolution = (
-        args.h_res[0],
-        args.h_res[1],
-        args.h_res[2]
+        args.hinge_dist[0],
+        args.hinge_dist[1],
+        args.hinge_dist[2]
     )
     cell_max_min = [
         args.area_min[0] + delta,

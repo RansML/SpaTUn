@@ -16,7 +16,7 @@ from plot_methods import BHM_PLOTTER
 - features are the kernel distance thing to hinge points?
 - output is a scalar value (ie: the velocity long X-Y plane, X-Z plane, or Z-Y plane)?
 - How do you determine what the hinge points are?
-    - q_resolution in config file determines how frequently to space the hinge points?
+    - query_dist in config file determines how frequently to space the hinge points?
     - How do you determine how big the total grid is on which to draw the hinge points?
 - What are the partitions?
 
@@ -119,7 +119,7 @@ def plot():
     Plots data loaded from the args.save_query_data_path parameter
     """
     print('Plotting started---------------')
-    plotter = BHM_PLOTTER(args, args.plot_title, args.surface_threshold, args.q_resolution, occupancy_plot_type=args.occupancy_plot_type)
+    plotter = BHM_PLOTTER(args, args.plot_title, args.surface_threshold, args.query_dist, occupancy_plot_type=args.occupancy_plot_type)
     for framei in range(args.num_frames):
         if args.model_type == 'occupancy':
             print("\nPlotting occupancy datapoints for frame %d ..." % framei)
@@ -149,25 +149,25 @@ if __name__ == '__main__':
     parser.add_argument('--save_config', type=str, help='Saves the argparse config to path if set relative to the config folder')
 
     # Train Arguments
-    parser.add_argument('--dataset_path', type=str, help='Path to dataset')
     parser.add_argument('--model_type', type=str, help='Model type (occupancy vs regression)')
     parser.add_argument('--likelihood_type', type=str, help='Likelihood type (Gamma, Gaussian)')
-    parser.add_argument('--kernel_type', type=str, help='Type of RBF kernel: Convolution (conv), Wasserstein (wass)')
-    parser.add_argument('--gamma', nargs='+', type=float, help='X Y Z Gamma (1-3 values)')
-    parser.add_argument('--h_res', nargs=3, type=int, help='X Y Z hinge point resolution (3 values)')
-    parser.add_argument('--num_partitions', nargs=3, type=int, help='X Y Z number of partitions per axis (3 values)')
-    parser.add_argument('--partition_bleed', type=float, help='Amount of bleed between partitions for plot stitching')
+    parser.add_argument('--dataset_path', type=str, help='Path to dataset')
     parser.add_argument('--area_min', nargs=3, type=int, help='X Y Z minimum coordinates in bounding box (3 values)')
     parser.add_argument('--area_max', nargs=3, type=int, help='X Y Z maximum coordinates in bounding box (3 values)')
+    parser.add_argument('--hinge_dist', nargs=3, type=int, help='X Y Z hinge point resolution (3 values)')
+    parser.add_argument('--kernel_type', type=str, help='Type of RBF kernel: Vanilla RBF(), Convolution (conv), Wasserstein (wass)')
+    parser.add_argument('--gamma', nargs='+', type=float, help='X Y Z Gamma (1-3 values)')
+    parser.add_argument('--num_partitions', nargs=3, type=int, help='X Y Z number of partitions per axis (3 values)')
+    parser.add_argument('--partition_bleed', type=float, help='Amount of bleed between partitions for plot stitching')
     parser.add_argument('--save_model_path', type=str, help='Path to save each model \
         (i.e. save_model_path is set to \"toy3_run0\", then the model at partition 1, frame 1 would save to \
         mdls/occupancy/toy3_run0_f1_p1)'
     )
 
     # Query Arguments
-    parser.add_argument('--query_blocks', type=int, default=None, help='How many blocks to break the query method into')
-    parser.add_argument('--q_resolution', nargs=3, type=float, help='X Y Z Q-resolution (3 values). If any value is\
+    parser.add_argument('--query_dist', nargs=3, type=float, help='X Y Z Q-resolution (3 values). If any value is\
         negative, a 4th value should be provided to slice the corresponding axis. If all negative, X_query=X_train.')
+    parser.add_argument('--query_blocks', type=int, default=None, help='How many blocks to break the query method into')
     parser.add_argument('--eval_path', type=str, help='Path of the evaluation dataset')
     parser.add_argument('--eval', type=int, help='1=evaluate metrics, 0, otherwise. Use data in --eval_path, if given.')
     parser.add_argument('--save_query_data_path', type=str, help='Path save each set of queried data \
