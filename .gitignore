@@ -8,3 +8,4 @@ query_data/
 /reports/*
 .DS_Store
 datasets/.DS_Store
+scratch.py

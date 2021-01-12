@@ -427,15 +427,15 @@ class BHM_VELOCITY_PYTORCH:
         # exit()
         return self.mu_x, self.sig_x, self.mu_y, self.sig_y, self.mu_z, self.sig_z
 
-    def predict(self, Xq, query_blocks=None):
+    def predict(self, Xq, query_blocks=-1, variance_only=False):
         if self.likelihood_type == "gamma":
-            return self.predict_gamma_likelihood(Xq, query_blocks)
+            return self.predict_gamma_likelihood(Xq, query_blocks, variance_only)
         elif self.likelihood_type == "gaussian":
-            return self.predict_gaussian_likelihood(Xq, query_blocks)
+            return self.predict_gaussian_likelihood(Xq, query_blocks, variance_only)
         else:
             raise ValueError("Unsupported likelihood type: \"{}\"".format(self.likelihood_type))
 
-    def predict_gaussian_likelihood(self, Xq, query_blocks=None):
+    def predict_gaussian_likelihood(self, Xq, query_blocks=-1, variance_only=False):
         """
         :param Xq: raw inquery points
         :return: mean occupancy (Laplace approximation)
@@ -446,19 +446,33 @@ class BHM_VELOCITY_PYTORCH:
         Xq = self.__sparse_features(Xq, self.rbf_kernel_type)#.double()
         print(" Kernelized query data shape:", Xq.shape)
 
-        if query_blocks is None:
+        if query_blocks <= 0:
             mu_a_x = Xq.mm(self.mu_x.reshape(-1, 1))#.squeeze()
-            sig2_inv_a_x = 1/self.beta + Xq.mm(self.sig_x).mm(Xq.t()) # (635, 2508) X (2508, 2508) --> (635, 2508)
-                                                                      # (635, 2508) X (2508, 625) --> (635, 635)
-            x = 1/self.beta + Xq.mm(self.sig_x)
-
             mu_a_y = Xq.mm(self.mu_y.reshape(-1, 1))#.squeeze()
-            sig2_inv_a_y = 1/self.beta + Xq.mm(self.sig_y).mm(Xq.t())
-
             mu_a_z = Xq.mm(self.mu_z.reshape(-1, 1))#.squeeze()
-            sig2_inv_a_z = 1/self.beta + Xq.mm(self.sig_z).mm(Xq.t())
+
+            if variance_only:
+                sig2_inv_a_x = 1/self.beta + diag_only_mm(Xq.mm(self.sig_x), Xq.t()) # (635, 2508) X (2508, 2508) --> (635, 2508), (635, 2508) X (2508, 635) --> (635, 635)
+                sig2_inv_a_y = 1/self.beta + diag_only_mm(Xq.mm(self.sig_y), Xq.t())
+                sig2_inv_a_z = 1/self.beta + diag_only_mm(Xq.mm(self.sig_z), Xq.t())
+
+                # sig2_inv_a_x_ = 1/self.beta + Xq.mm(self.sig_x).mm(Xq.t()) # (635, 2508) X (2508, 2508) --> (635, 2508), (635, 2508) X (2508, 625) --> (635, 635)
+                # sig2_inv_a_y_ = 1/self.beta + Xq.mm(self.sig_y).mm(Xq.t())
+                # sig2_inv_a_z_ = 1/self.beta + Xq.mm(self.sig_z).mm(Xq.t())
+                #
+                # print("torch.allclose(torch.diag(sig2_inv_a_x_), sig2_inv_a_x):", torch.allclose(torch.diag(sig2_inv_a_x_), sig2_inv_a_x))
+                # print("torch.allclose(torch.diag(sig2_inv_a_y_), sig2_inv_a_y):", torch.allclose(torch.diag(sig2_inv_a_y_), sig2_inv_a_y))
+                # print("torch.allclose(torch.diag(sig2_inv_a_z_), sig2_inv_a_z):", torch.allclose(torch.diag(sig2_inv_a_z_), sig2_inv_a_z))
+                #
+                # assert torch.allclose(torch.diag(sig2_inv_a_x_), sig2_inv_a_x)
+                # assert torch.allclose(torch.diag(sig2_inv_a_y_), sig2_inv_a_y)
+                # assert torch.allclose(torch.diag(sig2_inv_a_z_), sig2_inv_a_z)
 
 
+            else:
+                sig2_inv_a_x = 1/self.beta + Xq.mm(self.sig_x).mm(Xq.t()) # (635, 2508) X (2508, 2508) --> (635, 2508), (635, 2508) X (2508, 625) --> (635, 635)
+                sig2_inv_a_y = 1/self.beta + Xq.mm(self.sig_y).mm(Xq.t())
+                sig2_inv_a_z = 1/self.beta + Xq.mm(self.sig_z).mm(Xq.t())
         else:
             # import os, psutil
             # Kernelized query data shape: torch.Size([635, 2508])
@@ -485,9 +499,15 @@ class BHM_VELOCITY_PYTORCH:
             mu_a_x = torch.zeros((Xq.shape[0], 1))
             mu_a_y = torch.zeros((Xq.shape[0], 1))
             mu_a_z = torch.zeros((Xq.shape[0], 1))
-            sig2_inv_a_x = torch.zeros((Xq.shape[0], Xq.shape[0]))
-            sig2_inv_a_y = torch.zeros((Xq.shape[0], Xq.shape[0]))
-            sig2_inv_a_z = torch.zeros((Xq.shape[0], Xq.shape[0]))
+
+            if variance_only:
+                sig2_inv_a_x = torch.zeros((Xq.shape[0],))
+                sig2_inv_a_y = torch.zeros((Xq.shape[0],))
+                sig2_inv_a_z = torch.zeros((Xq.shape[0],))
+            else:
+                sig2_inv_a_x = torch.zeros((Xq.shape[0], Xq.shape[0]))
+                sig2_inv_a_y = torch.zeros((Xq.shape[0], Xq.shape[0]))
+                sig2_inv_a_z = torch.zeros((Xq.shape[0], Xq.shape[0]))
 
             for i in range(query_blocks):
                 start = i * step_size
@@ -499,34 +519,56 @@ class BHM_VELOCITY_PYTORCH:
                 mu_a_y[start:end] = Xq[start:end].mm(self.mu_y.reshape(-1, 1))#.squeeze()
                 mu_a_z[start:end] = Xq[start:end].mm(self.mu_z.reshape(-1, 1))#.squeeze()
 
-                for j in range(query_blocks):
-                    start2 = j * step_size
-                    end2 = start2 + step_size
-                    if end2 > Xq.shape[0]:
-                        end2 = Xq.shape[0]
+                if variance_only:
+                    # sig2_inv_a_x = 1/self.beta + diag_only_mm(Xq.mm(self.sig_x), Xq.t())
+                    sig2_inv_a_x[start:end] = 1/self.beta + diag_only_mm(Xq[start:end].mm(self.sig_x), Xq[start:end].t())
+                    sig2_inv_a_y[start:end] = 1/self.beta + diag_only_mm(Xq[start:end].mm(self.sig_y), Xq[start:end].t())
+                    sig2_inv_a_z[start:end] = 1/self.beta + diag_only_mm(Xq[start:end].mm(self.sig_z), Xq[start:end].t())
 
-                    sig2_inv_a_x[start:end, start2:end2] = 1/self.beta + Xq[start:end].mm(self.sig_x).mm(Xq[start2:end2].t())
-                    sig2_inv_a_y[start:end, start2:end2] = 1/self.beta + Xq[start:end].mm(self.sig_y).mm(Xq[start2:end2].t())
-                    sig2_inv_a_z[start:end, start2:end2] = 1/self.beta + Xq[start:end].mm(self.sig_z).mm(Xq[start2:end2].t())
+                    # sig2_inv_a_x[start:end, start:end] = 1/self.beta + Xq[start:end].mm(self.sig_x).mm(Xq[start:end].t())
+                    # sig2_inv_a_y[start:end, start:end] = 1/self.beta + Xq[start:end].mm(self.sig_y).mm(Xq[start:end].t())
+                    # sig2_inv_a_z[start:end, start:end] = 1/self.beta + Xq[start:end].mm(self.sig_z).mm(Xq[start:end].t())
+
+                else:
+                    for j in range(query_blocks):
+                        start2 = j * step_size
+                        end2 = start2 + step_size
+                        if end2 > Xq.shape[0]:
+                            end2 = Xq.shape[0]
+
+                        sig2_inv_a_x[start:end, start2:end2] = 1/self.beta + Xq[start:end].mm(self.sig_x).mm(Xq[start2:end2].t())
+                        sig2_inv_a_y[start:end, start2:end2] = 1/self.beta + Xq[start:end].mm(self.sig_y).mm(Xq[start2:end2].t())
+                        sig2_inv_a_z[start:end, start2:end2] = 1/self.beta + Xq[start:end].mm(self.sig_z).mm(Xq[start2:end2].t())
 
                 # print("Memory:", psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2)
-            # mu_a_x_ = Xq.mm(self.mu_x.reshape(-1, 1))#.squeeze()
-            # sig2_inv_a_x_ = 1/self.beta + Xq.mm(self.sig_x).mm(Xq.t()) # (635, 2508) X (2508, 2508) --> (635, 2508), then (635, 2508) X (2508, 625) --> (635, 635)
-            # mu_a_y_ = Xq.mm(self.mu_y.reshape(-1, 1))#.squeeze()
-            # sig2_inv_a_y_ = 1/self.beta + Xq.mm(self.sig_y).mm(Xq.t())
-            # mu_a_z_ = Xq.mm(self.mu_z.reshape(-1, 1))#.squeeze()
-            # sig2_inv_a_z_ = 1/self.beta + Xq.mm(self.sig_z).mm(Xq.t())
-            # assert torch.all(torch.eq(mu_a_x_, mu_a_x))
-            # assert torch.all(torch.eq(mu_a_y_, mu_a_y))
-            # assert torch.all(torch.eq(mu_a_z_, mu_a_z))
+            mu_a_x_ = Xq.mm(self.mu_x.reshape(-1, 1))#.squeeze()
+            sig2_inv_a_x_ = 1/self.beta + Xq.mm(self.sig_x).mm(Xq.t()) # (635, 2508) X (2508, 2508) --> (635, 2508), then (635, 2508) X (2508, 625) --> (635, 635)
+            mu_a_y_ = Xq.mm(self.mu_y.reshape(-1, 1))#.squeeze()
+            sig2_inv_a_y_ = 1/self.beta + Xq.mm(self.sig_y).mm(Xq.t())
+            mu_a_z_ = Xq.mm(self.mu_z.reshape(-1, 1))#.squeeze()
+            sig2_inv_a_z_ = 1/self.beta + Xq.mm(self.sig_z).mm(Xq.t())
+
+            print("torch.allclose(torch.diag(sig2_inv_a_x_), sig2_inv_a_x):", torch.allclose(torch.diag(sig2_inv_a_x_), sig2_inv_a_x))
+            print("torch.allclose(torch.diag(sig2_inv_a_y_), sig2_inv_a_y):", torch.allclose(torch.diag(sig2_inv_a_y_), sig2_inv_a_y))
+            print("torch.allclose(torch.diag(sig2_inv_a_z_), sig2_inv_a_z):", torch.allclose(torch.diag(sig2_inv_a_z_), sig2_inv_a_z))
+
+            print("torch.diag(sig2_inv_a_x_).shape:", torch.diag(sig2_inv_a_x_).shape)
+            print("sig2_inv_a_x.shape:", sig2_inv_a_x.shape)
+
+            assert torch.all(torch.eq(mu_a_x_, mu_a_x))
+            assert torch.all(torch.eq(mu_a_y_, mu_a_y))
+            assert torch.all(torch.eq(mu_a_z_, mu_a_z))
             # assert torch.allclose(sig2_inv_a_x_, sig2_inv_a_x)
             # assert torch.allclose(sig2_inv_a_y_, sig2_inv_a_y)
             # assert torch.allclose(sig2_inv_a_z_, sig2_inv_a_z)
-            # # print("Memory:", psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2)
+            assert torch.allclose(torch.diag(sig2_inv_a_x_), sig2_inv_a_x)
+            assert torch.allclose(torch.diag(sig2_inv_a_y_), sig2_inv_a_y)
+            assert torch.allclose(torch.diag(sig2_inv_a_z_), sig2_inv_a_z)
+            # print("Memory:", psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2)
 
         return mu_a_x, sig2_inv_a_x, mu_a_y, sig2_inv_a_y, mu_a_z, sig2_inv_a_z
 
-    def predict_gamma_likelihood(self, Xq, query_blocks=None):
+    def predict_gamma_likelihood(self, Xq, query_blocks=-1):
         # Xq = self.__sparse_features(Xq, self.rbf_kernel_type)
         # Xq = Xq.cpu().detach().numpy()
         # return np.exp(Xq.dot(self.w_hatx)), np.exp(Xq.dot(self.w_haty)), np.exp(Xq.dot(self.w_hatz))
@@ -534,7 +576,7 @@ class BHM_VELOCITY_PYTORCH:
         Xq = self.__sparse_features(Xq, self.rbf_kernel_type).double()
         print(" Kernelized query data shape:", Xq.shape)
 
-        if query_blocks is None:
+        if query_blocks <= 0:
             mean_x, mean_y, mean_z = torch.exp(Xq.mm(self.w_hatx)), torch.exp(Xq.mm(self.w_haty)), torch.exp(Xq.mm(self.w_hatz))
         else:
             mean_x_, mean_y_, mean_z_ = torch.exp(Xq.mm(self.w_hatx)), torch.exp(Xq.mm(self.w_haty)), torch.exp(Xq.mm(self.w_hatz))
@@ -620,3 +662,35 @@ class BHM_VELOCITY_PYTORCH:
         mu = self.beta*sig.dot(theta.T.dot(y))
 
         return torch.tensor(mu, dtype=torch.float32), torch.tensor(sig, dtype=torch.float32) # change to double??
+
+
+def diag_only_mm(x, y):
+    return (x * y.T).sum(-1)
+    # # print("\nx.shape:", x.shape)
+    # # print("y.T.shape:", y.T.shape)
+    # #
+    # # if y.T.shape[0] < x.shape[0]:
+    # #     zeds = torch.zeros_like(x).T
+    # #
+    # #     yt = y.T
+    # #
+    # #     zeds[:yt.shape[0], :] = yt
+    # #     y = zeds.T
+    # #
+    # # print("(x * y.T).shape:", (x * y.T).shape)
+    # # z = (x * y.T).sum(-1)
+    # # print("z.shape:", z.shape)
+    # # return (x * y.T).sum(-1)
+    #
+    # print("\nx.shape:", x.shape)
+    # print("y.shape:", y.shape)
+    # yt = y.T
+    # print("yt.shape:", yt.shape)
+    # if yt.shape[0] < x.shape[0]:
+    #     zeds = torch.zeros_like(x)
+    #     print("zeds.shape:", zeds.shape)
+    #     zeds[:yt.shape[0]] = yt
+    #     yt = zeds
+    # print("yt.shape:", yt.shape)
+    #
+    # return (x * yt).sum(-1)
