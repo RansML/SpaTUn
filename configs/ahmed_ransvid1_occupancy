@@ -1,7 +1,8 @@
 {
   "dataset_path": "./datasets/ahmed/ransvid1_600",
   "plot_title": "ahmed_ransvid1_600",
-  "surface_threshold": 0.7,
+  "hinge_type": "grid",
+  "surface_threshold": [0.7],
   "num_frames": 1,
   "plot_type": "occupancy",
   "occupancy_plot_type": "scatter",

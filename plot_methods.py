@@ -5,6 +5,7 @@ import pandas as pd
 import plotly
 import plotly.graph_objects as go
 import plotly.figure_factory as ff
+import trimesh
 import time
 import torch
 import numpy as np
@@ -204,8 +205,15 @@ class BHM_PLOTTER():
             zz.extend(torch.arange(segi[4], segi[5], self.args.q_resolution[2]).tolist())
 
         surface = yqs.reshape((len(xx), len(yy), len(zz))).numpy()
+        mcubes_mesh = trimesh.voxel.ops.matrix_to_marching_cubes(surface)
+        trimesh.exchange.export.export_mesh(mcubes_mesh, "ply_files/out.stl", file_type='stl')
+
         vertices, simplices, normals, values= measure.marching_cubes_lewiner(surface)
-        x,y,z = zip(*vertices)  
+        x, y, z = zip(*vertices)
+        #rescale to center at zero
+        # x -= max(x)/2
+        # y -= max(y)/2
+        # z -= max(z)/2
 
         #Add plot for marching cubes
         fig_mcubes = ff.create_trisurf(
@@ -214,7 +222,8 @@ class BHM_PLOTTER():
                 z=z,
                 show_colorbar=True,
                 plot_edges=True,
-                simplices=simplices)
+                simplices=simplices,
+        )
         
         fig.add_trace(fig_mcubes.data[0], row=1, col=4)
 

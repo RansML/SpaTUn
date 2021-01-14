@@ -3,7 +3,7 @@
   "plot_title": "bernoulli-surface",
   "surface_threshold": [-0.3, 0.3],
   "num_frames": 1,
-  "hinge_type": "hit_locations",
+  "hinge_type": "grid",
   "model_type": "occupancy",
   "likelihood_type":"gaussian",
   "config": "bernoulli-surface",

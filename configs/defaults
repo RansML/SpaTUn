@@ -4,7 +4,9 @@
   "plot_title": "",
   "surface_threshold": [-10000,10000],
   "num_frames": 1,
+  "hinge_type": "grid",
   "model_type": "occupancy",
+  "likelihood_type":"gaussian",
   "config": "",
   "save_config": "",
   "q_resolution": [

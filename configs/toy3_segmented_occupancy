@@ -1,7 +1,7 @@
 {
   "dataset_path": "./datasets/toy3/toy3",
   "plot_title": "toy3",
-  "surface_threshold": 0.7,
+  "surface_threshold": [0.7],
   "num_frames": 1,
   "model_type": "occupancy",
   "config": "",
