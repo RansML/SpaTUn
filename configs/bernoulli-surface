@@ -1,5 +1,5 @@
 {
-  "dataset_path": "./datasets/bernoulli-surface/shell",
+  "dataset_path": "./datasets/bernoulli-surface/sphere",
   "plot_title": "bernoulli-surface",
   "surface_threshold": [-0.3, 0.3],
   "num_frames": 1,

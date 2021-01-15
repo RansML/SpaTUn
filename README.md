@@ -38,7 +38,10 @@ bernoulli-surface Dataset: Dataset with samples on the mesh of a shell. The mesh
 ```
 python3 make_csv.py ply_files/shell.ply datasets/bernoulli-surface/shell.csv
 ```
-
+Change the parameter 'dataset_path' in the bernoulli-surface config file to the path of the outputted csv file and run:
+```
+python3 spatun.py --config bernoulli-surface
+```
 ### Sample 2D Gaussian (Regression) Configurations
 
 Toy Dataset: Simple dataset with LIDAR hits along with adjustable uncertainty (sigma). The dataset is located in datasets/toy/toy.csv. To run the sample, use:
