@@ -3,8 +3,13 @@ __pycache__/
 mdls/
 plots/
 query_data/
-.idea
+/datasets/*
 /datasets/kyle_ransalu/6_jfk/*
 /reports/*
+/configs/kyle_ransalu_tuned/*
+/configs/kyle_ransalu_tuned_dec/*
+.idea
 .DS_Store
 datasets/.DS_Store
+.ipynb_checkpoints
+.ipynb_checkpoints/*

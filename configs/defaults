@@ -1,47 +1,29 @@
 {
   "mode": "tqp",
-  "dataset_path": "./datasets/toy/toy",
-  "plot_title": "",
-  "surface_threshold": [-10000,10000],
   "num_frames": 1,
-  "hinge_type": "grid",
-  "model_type": "occupancy",
-  "likelihood_type":"gaussian",
   "config": "",
   "save_config": "",
-  "q_resolution": [
-    0.5,
-    0.5,
-    0.5
-  ],
-  "gamma": [
-    0.1
-  ],
-  "h_res": [
-    3,
-    3,
-    3
-  ],
+
+  "model_type": "occupancy",
+  "likelihood_type": "",
+  "dataset_path": "./datasets/toy/toy",
+  "area_min": [-100,-100,-50],
+  "area_max": [100,100,50],
+  "hinge_type": "grid",
+  "hinge_dist": [3,3,3],
   "kernel_type": "conv",
-  "num_partitions": [
-    3,
-    3,
-    3
-  ],
-  "area_min": [
-    -100,
-    -100,
-    -50
-  ],
-  "area_max": [
-    100,
-    100,
-    50
-  ],
+  "gamma": [0.1],
+  "num_partitions": [3,3,3],
   "partition_bleed": 0.25,
-  "occupancy_plot_type": "scatter",
   "save_model_path": "tmp",
-  "save_query_data_path": "tmp",
+
+  "query_dist": [0.5,0.5,0.5],
+  "query_blocks": 10,
   "eval_path": "",
-  "eval": 1
+  "eval": 0,
+  "save_query_data_path": "tmp",
+
+  "occupancy_plot_type": "scatter",
+  "plot_title": "",
+  "surface_threshold": [-10000,10000]
 }

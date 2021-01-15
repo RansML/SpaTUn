@@ -111,9 +111,9 @@ def query_occupancy(args, partitions, X, y, framei):
         bhm_mdl = load_mdl(args, 'occupancy/{}_f{}_p{}'.format(args.save_model_path, framei, i), 'BHM3D_PYTORCH')
         # query the model
         xx, yy, zz = torch.meshgrid(
-            torch.arange(segi[0], segi[1], args.q_resolution[0]),
-            torch.arange(segi[2], segi[3], args.q_resolution[1]),
-            torch.arange(segi[4], segi[5], args.q_resolution[2])
+            torch.arange(segi[0], segi[1], args.query_dist[0]),
+            torch.arange(segi[2], segi[3], args.query_dist[1]),
+            torch.arange(segi[4], segi[5], args.query_dist[2])
         )
         Xq = torch.stack([xx.flatten(), yy.flatten(), zz.flatten()], dim=1)
         time1 = time.time()
@@ -145,13 +145,13 @@ def query_regression(args, cell_max_min, X, y_occupancy, g, framei):
     xx, yy = torch.meshgrid(
         torch.arange(
             cell_max_min[0],
-            cell_max_min[1]+args.q_resolution[0],
-            args.q_resolution[0]
+            cell_max_min[1]+args.query_dist[0],
+            args.query_dist[0]
         ),
         torch.arange(
             cell_max_min[2],
-            cell_max_min[3]+args.q_resolution[1],
-            args.q_resolution[1]
+            cell_max_min[3]+args.query_dist[1],
+            args.query_dist[1]
         ),
     )
     Xq_mv = torch.stack([xx.flatten(), yy.flatten()], dim=1)
@@ -171,94 +171,94 @@ def query_velocity(args, X, y_vx, y_vy, y_vz, partitions, cell_resolution, cell_
         print(" Query data from the test dataset")
         Xq_mv, y_vx_true, y_vy_true, y_vz_true, _ = read_frame_velocity(args, framei, args.eval_path, cell_max_min)
         option = args.eval_path
-    elif args.q_resolution[0] <= 0 and args.q_resolution[1] <= 0 and args.q_resolution[2] <= 0:
+    elif args.query_dist[0] <= 0 and args.query_dist[1] <= 0 and args.query_dist[2] <= 0:
         #if all q_res are non-positive, then query input = X
         print(" Query data is the same as input data")
         Xq_mv = X
         option = 'Train data'
-    elif args.q_resolution[0] <= 0 or args.q_resolution[1] <= 0 or args.q_resolution[2] <= 0:
+    elif args.query_dist[0] <= 0 or args.query_dist[1] <= 0 or args.query_dist[2] <= 0:
         #if at least one q_res is non-positive, then
-        if args.q_resolution[0] <= 0: #x-slice
-            print(" Query data is x={} slice ".format(args.q_resolution[3]))
+        if args.query_dist[0] <= 0: #x-slice
+            print(" Query data is x={} slice ".format(args.query_dist[3]))
             xx, yy, zz = torch.meshgrid(
                 torch.arange(
-                    args.q_resolution[3],
-                    args.q_resolution[3] + 0.1,
+                    args.query_dist[3],
+                    args.query_dist[3] + 0.1,
                     1
                 ),
                 torch.arange(
                     cell_max_min[2],
-                    cell_max_min[3] + args.q_resolution[1],
-                    args.q_resolution[1]
+                    cell_max_min[3] + args.query_dist[1],
+                    args.query_dist[1]
                 ),
                 torch.arange(
                     cell_max_min[4],
-                    cell_max_min[5] + args.q_resolution[2],
-                    args.q_resolution[2]
+                    cell_max_min[5] + args.query_dist[2],
+                    args.query_dist[2]
                 )
             )
             Xq_mv = torch.stack([xx.flatten(), yy.flatten(), zz.flatten()], dim=1)
-            option = 'X slice at '.format(args.q_resolution[3])
-        elif args.q_resolution[1] <= 0: #y-slice
-            print("Query data is y={} slice ".format(args.q_resolution[3]))
+            option = 'X slice at '.format(args.query_dist[3])
+        elif args.query_dist[1] <= 0: #y-slice
+            print("Query data is y={} slice ".format(args.query_dist[3]))
             xx, yy, zz = torch.meshgrid(
                 torch.arange(
                     cell_max_min[0],
-                    cell_max_min[1] + args.q_resolution[0],
-                    args.q_resolution[0]
+                    cell_max_min[1] + args.query_dist[0],
+                    args.query_dist[0]
                 ),
                 torch.arange(
-                    args.q_resolution[3],
-                    args.q_resolution[3] + 0.1,
+                    args.query_dist[3],
+                    args.query_dist[3] + 0.1,
                     1
                 ),
                 torch.arange(
                     cell_max_min[4],
-                    cell_max_min[5] + args.q_resolution[2],
-                    args.q_resolution[2]
+                    cell_max_min[5] + args.query_dist[2],
+                    args.query_dist[2]
                 )
             )
             Xq_mv = torch.stack([xx.flatten(), yy.flatten(), zz.flatten()], dim=1)
-            option = 'Y slice at '.format(args.q_resolution[3])
+            option = 'Y slice at '.format(args.query_dist[3])
         else: #z-slice
-            print("Query data is z={} slice ".format(args.q_resolution[3]))
+            print("Query data is z={} slice ".format(args.query_dist[3]))
             xx, yy, zz = torch.meshgrid(
                 torch.arange(
                     cell_max_min[0],
-                    cell_max_min[1] + args.q_resolution[0],
-                    args.q_resolution[0]
+                    cell_max_min[1] + args.query_dist[0],
+                    args.query_dist[0]
                 ),
                 torch.arange(
                     cell_max_min[2],
-                    cell_max_min[3] + args.q_resolution[1],
-                    args.q_resolution[1]
+                    cell_max_min[3] + args.query_dist[1],
+                    args.query_dist[1]
                 ),
                 torch.arange(
-                    args.q_resolution[3],
-                    args.q_resolution[3] + 0.1,
+                    args.query_dist[3],
+                    args.query_dist[3] + 0.1,
                     1
                 )
             )
             Xq_mv = torch.stack([xx.flatten(), yy.flatten(), zz.flatten()], dim=1)
-            option = 'Z slice at '.format(args.q_resolution[3])
+            option = 'Z slice at '.format(args.query_dist[3])
     else:
         #if not use the grid
         print("Query data is a 3D gird.")
         xx, yy, zz = torch.meshgrid(
             torch.arange(
                 cell_max_min[0],
-                cell_max_min[1]+args.q_resolution[0],
-                args.q_resolution[0]
+                cell_max_min[1]+args.query_dist[0],
+                args.query_dist[0]
             ),
             torch.arange(
                 cell_max_min[2],
-                cell_max_min[3]+args.q_resolution[1],
-                args.q_resolution[1]
+                cell_max_min[3]+args.query_dist[1],
+                args.query_dist[1]
             ),
             torch.arange(
                 cell_max_min[4],
-                cell_max_min[5]+args.q_resolution[2],
-                args.q_resolution[2]
+                cell_max_min[5]+args.query_dist[2],
+                args.query_dist[2]
             )
         )
         Xq_mv = torch.stack([xx.flatten(), yy.flatten(), zz.flatten()], dim=1)
@@ -269,7 +269,7 @@ def query_velocity(args, X, y_vx, y_vy, y_vz, partitions, cell_resolution, cell_
     if args.likelihood_type == "gamma":
         mean_x, mean_y, mean_z = bhm_velocity_mdl.predict(Xq_mv)
     elif args.likelihood_type == "gaussian":
-        mean_x, var_x, mean_y, var_y, mean_z, var_z = bhm_velocity_mdl.predict(Xq_mv)
+        mean_x, var_x, mean_y, var_y, mean_z, var_z = bhm_velocity_mdl.predict(Xq_mv, args.query_blocks)
     else:
         raise ValueError("Unsupported likelihood type: \"{}\"".format(args.likelihood_type))
 

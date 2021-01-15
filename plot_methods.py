@@ -16,7 +16,7 @@ from bhmtorch_cpu import BHM3D_PYTORCH
 from bhmtorch_cpu import BHM_REGRESSION_PYTORCH
 from plotly.subplots import make_subplots
 
-plotly.io.orca.config.executable = "/home/khatch/anaconda3/envs/hilbert/bin/orca"
+# plotly.io.orca.config.executable = "/home/khatch/anaconda3/envs/hilbert/bin/orca"
 # import plotly.io as pio
 # pio.orca.config.use_xvfb = True
 # plotly.io.orca.config.executable = "/home/khatch/Documents/orca-1.3.1.AppImage"
@@ -25,11 +25,11 @@ plotly.io.orca.config.executable = "/home/khatch/anaconda3/envs/hilbert/bin/orca
 # BHM Plotting Class
 # ==============================================================================
 class BHM_PLOTTER():
-    def __init__(self, args, plot_title, surface_threshold, q_resolution,occupancy_plot_type='scatter', plot_denoise=0.98):
+    def __init__(self, args, plot_title, surface_threshold, query_dist, occupancy_plot_type='scatter', plot_denoise=0.98):
         self.args = args
         self.plot_title = plot_title
         self.surface_threshold = surface_threshold
-        self.q_resolution = q_resolution
+        self.query_dist = query_dist
         self.occupancy_plot_type = occupancy_plot_type
         self.plot_denoise = plot_denoise
         print(' Successfully initialized plotly plotting class')
@@ -293,8 +293,8 @@ class BHM_PLOTTER():
         @param fig: plotly fig
         """
         Xqs, means, vars = meanVarPlot[0], meanVarPlot[1], torch.diag(meanVarPlot[2])
-        x = torch.arange(cell_max_min[0], cell_max_min[1]+self.q_resolution[0], self.q_resolution[0])
-        y = torch.arange(cell_max_min[2], cell_max_min[3]+self.q_resolution[1], self.q_resolution[1])
+        x = torch.arange(cell_max_min[0], cell_max_min[1]+self.query_dist[0], self.query_dist[0])
+        y = torch.arange(cell_max_min[2], cell_max_min[3]+self.query_dist[1], self.query_dist[1])
         colorbar_len = 1.05
         colorbar_thickness = 15
         colorbar_yaxis = 0.5
@@ -557,7 +557,7 @@ class BHM_PLOTTER():
         )
 
         # calc error - possible only when Xq_mv = X
-        #if self.args.q_resolution[0] <= 0 and self.args.q_resolution[1] <= 0 and self.args.q_resolution[2] <= 0:
+        #if self.args.query_dist[0] <= 0 and self.args.query_dist[1] <= 0 and self.args.query_dist[2] <= 0:
         #    print(" RMSE:", torch.sqrt(torch.mean((y_vy - mean_y)**2)).item())
 
         # filter by surface threshold
@@ -629,7 +629,7 @@ class BHM_PLOTTER():
         )
 
         # calc error - possible only when Xq_mv = X
-        #if self.args.q_resolution[0] <= 0 and self.args.q_resolution[1] <= 0 and self.args.q_resolution[2] <= 0:
+        #if self.args.query_dist[0] <= 0 and self.args.query_dist[1] <= 0 and self.args.query_dist[2] <= 0:
         #    print(" RMSE:", torch.sqrt(torch.mean((y_vy - mean_y)**2)).item())
 
         # filter by surface threshold
