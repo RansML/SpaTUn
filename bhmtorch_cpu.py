@@ -484,12 +484,12 @@ class BHM_VELOCITY_PYTORCH:
                 mu_a_z[start:end] = Xq[start:end].mm(self.mu_z.reshape(-1, 1))#.squeeze()
 
                 if variance_only:
-                    print("VARIANCE ONLY")
+                    #print("VARIANCE ONLY")
                     sig2_inv_a_x[start:end] = 1/self.beta + diag_only_mm(Xq[start:end].mm(self.sig_x), Xq[start:end].t())
                     sig2_inv_a_y[start:end] = 1/self.beta + diag_only_mm(Xq[start:end].mm(self.sig_y), Xq[start:end].t())
                     sig2_inv_a_z[start:end] = 1/self.beta + diag_only_mm(Xq[start:end].mm(self.sig_z), Xq[start:end].t())
                 else:
-                    print("NO VARIANCE ONLY")
+                    #print("NO VARIANCE ONLY")
                     for j in range(query_blocks):
                         start2 = j * step_size
                         end2 = start2 + step_size
