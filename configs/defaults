@@ -18,6 +18,7 @@
 
   "query_dist": [0.5,0.5,0.5],
   "query_blocks": 10,
+  "variance_only":false,
   "eval_path": "",
   "eval": 0,
   "save_query_data_path": "tmp",

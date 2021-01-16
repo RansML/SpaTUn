@@ -11,7 +11,7 @@ from bhmtorch_cpu import BHM3D_PYTORCH
 from bhmtorch_cpu import BHM_REGRESSION_PYTORCH
 from plotly.subplots import make_subplots
 
-# plotly.io.orca.config.executable = "/home/khatch/anaconda3/envs/hilbert/bin/orca"
+plotly.io.orca.config.executable = "/home/khatch/anaconda3/envs/hilbert/bin/orca"
 # import plotly.io as pio
 # pio.orca.config.use_xvfb = True
 # plotly.io.orca.config.executable = "/home/khatch/Documents/orca-1.3.1.AppImage"

@@ -14,7 +14,8 @@
     0.1,
     0.1
   ],
-  "variance_only":true,
+  "query_dist":[0.1, 0.1, 0.1],
+  "variance_only":false,
   "query_blocks":10,
   "gamma": [
     200

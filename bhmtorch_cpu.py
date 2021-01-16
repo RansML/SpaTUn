@@ -484,10 +484,12 @@ class BHM_VELOCITY_PYTORCH:
                 mu_a_z[start:end] = Xq[start:end].mm(self.mu_z.reshape(-1, 1))#.squeeze()
 
                 if variance_only:
+                    print("VARIANCE ONLY")
                     sig2_inv_a_x[start:end] = 1/self.beta + diag_only_mm(Xq[start:end].mm(self.sig_x), Xq[start:end].t())
                     sig2_inv_a_y[start:end] = 1/self.beta + diag_only_mm(Xq[start:end].mm(self.sig_y), Xq[start:end].t())
                     sig2_inv_a_z[start:end] = 1/self.beta + diag_only_mm(Xq[start:end].mm(self.sig_z), Xq[start:end].t())
                 else:
+                    print("NO VARIANCE ONLY")
                     for j in range(query_blocks):
                         start2 = j * step_size
                         end2 = start2 + step_size
@@ -505,20 +507,36 @@ class BHM_VELOCITY_PYTORCH:
             mu_a_z_ = Xq.mm(self.mu_z.reshape(-1, 1))#.squeeze()
             sig2_inv_a_z_ = 1/self.beta + Xq.mm(self.sig_z).mm(Xq.t())
 
-            print("torch.allclose(torch.diag(sig2_inv_a_x_), sig2_inv_a_x):", torch.allclose(torch.diag(sig2_inv_a_x_), sig2_inv_a_x))
-            print("torch.allclose(torch.diag(sig2_inv_a_y_), sig2_inv_a_y):", torch.allclose(torch.diag(sig2_inv_a_y_), sig2_inv_a_y))
-            print("torch.allclose(torch.diag(sig2_inv_a_z_), sig2_inv_a_z):", torch.allclose(torch.diag(sig2_inv_a_z_), sig2_inv_a_z))
-
-            print("torch.diag(sig2_inv_a_x_).shape:", torch.diag(sig2_inv_a_x_).shape)
-            print("sig2_inv_a_x.shape:", sig2_inv_a_x.shape)
-
             assert torch.all(torch.eq(mu_a_x_, mu_a_x))
             assert torch.all(torch.eq(mu_a_y_, mu_a_y))
             assert torch.all(torch.eq(mu_a_z_, mu_a_z))
 
-            assert torch.allclose(torch.diag(sig2_inv_a_x_), sig2_inv_a_x)
-            assert torch.allclose(torch.diag(sig2_inv_a_y_), sig2_inv_a_y)
-            assert torch.allclose(torch.diag(sig2_inv_a_z_), sig2_inv_a_z)
+            if variance_only:
+                print("VARIANCE ONLY (debuging asserts)")
+
+                print("torch.allclose(torch.diag(sig2_inv_a_x_), sig2_inv_a_x):", torch.allclose(torch.diag(sig2_inv_a_x_), sig2_inv_a_x))
+                print("torch.allclose(torch.diag(sig2_inv_a_y_), sig2_inv_a_y):", torch.allclose(torch.diag(sig2_inv_a_y_), sig2_inv_a_y))
+                print("torch.allclose(torch.diag(sig2_inv_a_z_), sig2_inv_a_z):", torch.allclose(torch.diag(sig2_inv_a_z_), sig2_inv_a_z))
+
+                print("torch.diag(sig2_inv_a_x_).shape:", torch.diag(sig2_inv_a_x_).shape)
+                print("sig2_inv_a_x.shape:", sig2_inv_a_x.shape)
+
+                assert torch.allclose(torch.diag(sig2_inv_a_x_), sig2_inv_a_x)
+                assert torch.allclose(torch.diag(sig2_inv_a_y_), sig2_inv_a_y)
+                assert torch.allclose(torch.diag(sig2_inv_a_z_), sig2_inv_a_z)
+            else:
+                print("NO VARIANCE ONLY (debuging asserts)")
+
+                print("torch.allclose(sig2_inv_a_x_, sig2_inv_a_x):", torch.allclose(sig2_inv_a_x_, sig2_inv_a_x))
+                print("torch.allclose(sig2_inv_a_y_, sig2_inv_a_y):", torch.allclose(sig2_inv_a_y_, sig2_inv_a_y))
+                print("torch.allclose(sig2_inv_a_z_, sig2_inv_a_z):", torch.allclose(sig2_inv_a_z_, sig2_inv_a_z))
+
+                print("sig2_inv_a_x_.shape:", sig2_inv_a_x_.shape)
+                print("sig2_inv_a_x.shape:", sig2_inv_a_x.shape)
+
+                assert torch.allclose(sig2_inv_a_x_, sig2_inv_a_x)
+                assert torch.allclose(sig2_inv_a_y_, sig2_inv_a_y)
+                assert torch.allclose(sig2_inv_a_z_, sig2_inv_a_z)
 
         return mu_a_x, sig2_inv_a_x, mu_a_y, sig2_inv_a_y, mu_a_z, sig2_inv_a_z
 
