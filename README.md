@@ -7,7 +7,7 @@ Description.
 
 | Model Type | Likelihood |Examples |
 | ----------- | --- |----------- |
-| occupancy3d     | Bernoulli | 3d continuous occupancy maps  |
+| occupancy3d     | Bernoulli | 3D continuous occupancy maps  |
 | scalarfield2d   | Gaussian, Gamma | Elevation maps         |
 | scalarfield3d   | Gaussian, Gamma | Position maps, Velocity maps |
 | vetorfield3d    | Gaussian | Velocity maps, acceleration maps        |
