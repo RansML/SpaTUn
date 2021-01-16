@@ -4,7 +4,8 @@ mdls/
 plots/
 query_data/
 /datasets/*
-/datasets/kyle_ransalu/6_jfk/*
+!/datasets/generation/
+!/datasets/bernoulli-surface/
 /reports/*
 /configs/kyle_ransalu_tuned/*
 /configs/kyle_ransalu_tuned_dec/*

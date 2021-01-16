@@ -1,0 +1,62 @@
+import spartun as spt
+
+SpaTUn
+ |_spatun/ 
+   |___init__.py
+   |_utils/
+   |_train_methods.py
+   |_test_methods.py
+   |_plot_methods/
+     |_occupancy3d.py
+     |_scalerfield2d.py
+     |_scalerfield3d.py
+     |_vectorfield3d.py
+     |_surface3d.py
+   |_bhm_pytorch/
+     |_bhm_pytorch_gaussian.py
+     |_bhm_pytorch_bernoulli.py
+     |_bhm_pytorch_gamma.py
+   |_kernels.py
+   |_spatun.py
+   |_crossval.py
+ |_docs/
+ |_test/
+   |_configs/
+     |_occupancy3d/
+     |_scalerfield2d/
+     |_scalerfield3d/
+     |_vectorfield3d/
+     |_surface3d
+   |_datasets/
+     |_occupancy3d/
+     |_scalerfield2d/
+     |_scalerfield3d/
+     |_vectorfield3d/
+     |_surface3d/
+   |_plots/
+     |_occupancy3d/
+     |_scalerfield2d/
+     |_scalerfield3d/
+     |_vectorfield3d/
+     |_surface3d/
+   |_mdls/
+     |_occupancy3d/
+     |_scalerfield2d/
+     |_scalerfield3d/
+     |_vectorfield3d/
+     |_surface3d/
+   |_reports/
+     |_occupancy3d/
+     |_scalerfield2d/
+     |_scalerfield3d/
+     |_vectorfield3d/
+     |_surface3d/
+ |_tutorial/
+ |_website/
+ |_images/
+ |_readme.md
+ |_setup.py
+ |_liscense
+ |_.gitignore
+
+
