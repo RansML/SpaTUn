@@ -35,14 +35,14 @@ Description.
 
 The BHM training and plotting module provides a way to quickly save and load experiment configurations via the configs folder. This can be done by setting --config [config_file_name] to load a config, or --save_config [save_to_path] to save a config. For a full list of editable hyper-parameters, refer to the documentation in train.py.
 
-### Sample 3D Bernoulli (Classification) Configurations
+### occupancy3d configurations (Vivian ~~and Jason~~)
 
 Toy3 Dataset: Simple dataset with LIDAR hits along with adjustable uncertainty (sigma). The dataset is located in datasets/toy3/toy3.csv. To run the sample, use:
 ```
 python3 spatun.py --config toy3_occupancy
 ```
 
-### Sample 2D Gaussian (Regression) Configurations
+### scalarfield2d configurations (Lydia, ~~Jason, and Ahmed~~)
 
 Toy Dataset: Simple dataset with LIDAR hits along with adjustable uncertainty (sigma). The dataset is located in datasets/toy/toy.csv. To run the sample, use:
 ```
@@ -59,7 +59,7 @@ Toy3 Dataset: Simple dataset with LIDAR hits along with adjustable uncertainty (
 python3 spatun.py --config toy3_regression
 ```
 
-### Sample 3D Gaussian (Regression) Configurations
+### scalarfield3d/vetorfield3d configurations (Kyle and Ransalu)
 
 Toy 3D velocty dataset in /datasets/toy_velocity/toy_velocity_1.csv:
 ```
@@ -74,4 +74,11 @@ python spatun.py --config velocity1_gauss
 For Kyle and Ransalu
 ```
 python spatun.py --config kyle_ransalu/1_toy1_vel --mode tqp
+```
+
+### surface3d configurations (Vivian)
+
+Toy Dataset: Simple dataset with LIDAR hits along with adjustable uncertainty (sigma). The dataset is located in datasets/toy/toy.csv. To run the sample, use:
+```
+python3 spatun.py --config toy_regression
 ```
