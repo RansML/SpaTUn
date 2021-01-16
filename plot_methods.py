@@ -7,11 +7,20 @@ import plotly.graph_objects as go
 import time
 import torch
 
+#vivian
+import plotly.figure_factory as ff
+import trimesh
+import time
+import torch
+import numpy as np
+from skimage import measure
+import utils_filereader
+
 from bhmtorch_cpu import BHM3D_PYTORCH
 from bhmtorch_cpu import BHM_REGRESSION_PYTORCH
 from plotly.subplots import make_subplots
 
-plotly.io.orca.config.executable = "/home/khatch/anaconda3/envs/hilbert/bin/orca"
+# plotly.io.orca.config.executable = "/home/khatch/anaconda3/envs/hilbert/bin/orca"
 # import plotly.io as pio
 # pio.orca.config.use_xvfb = True
 # plotly.io.orca.config.executable = "/home/khatch/Documents/orca-1.3.1.AppImage"
@@ -79,19 +88,20 @@ class BHM_PLOTTER():
             col=1
         )
 
-    def plot_predictions(self, toPlot, fig):
+    def plot_predictions(self, toPlot, fig, iframe):
         """
         Occupancy: Plots volumetric plot of predictions
 
         @param toPlot: array of (Xq, yq, vars) (3D location and occupancy prediction)
         @param fig: plotly fig
+        @param iframe: ith frame
         """
-        Xqs = torch.zeros((1,3))
+        Xqs = torch.zeros((1, 3))
         yqs = torch.ones(1)
         vars = torch.zeros(1)
         for ploti in toPlot:
             var = ploti[2]
-            if self.surface_threshold > 0:
+            if self.surface_threshold[0] > 0:
                 ploti = self.filter_predictions(ploti)
             Xq, yq = ploti[0], ploti[1]
             if Xq.shape[0] <= 1: continue
@@ -107,23 +117,23 @@ class BHM_PLOTTER():
         if self.occupancy_plot_type == 'volumetric':
             fig.add_trace(
                 go.Volume(
-                    x=Xqs[1:,0],
-                    y=Xqs[1:,1],
-                    z=Xqs[1:,2],
+                    x=Xqs[1:, 0],
+                    y=Xqs[1:, 1],
+                    z=Xqs[1:, 2],
                     isomin=0,
                     isomax=1,
                     value=yqs,
                     opacity=0.05,
                     surface_count=40,
                     colorscale="Jet",
-                    opacityscale=[[0,0],[self.surface_threshold,0],[1,1]],
+                    opacityscale=[[0, 0], [self.surface_threshold[0], 0], [1, 1]],
                     colorbar=dict(
-                        x=0.65,
+                        x=0.46,
                         len=colorbar_len,
                         y=colorbar_y
                     ),
                     cmax=1,
-                    cmin=self.surface_threshold,
+                    cmin=self.surface_threshold[0],
                 ),
                 row=1,
                 col=2
@@ -131,17 +141,17 @@ class BHM_PLOTTER():
         elif self.occupancy_plot_type == 'scatter':
             fig.add_trace(
                 go.Scatter3d(
-                    x=Xqs[1:,0],
-                    y=Xqs[1:,1],
-                    z=Xqs[1:,2],
+                    x=Xqs[1:, 0],
+                    y=Xqs[1:, 1],
+                    z=Xqs[1:, 2],
                     mode='markers',
                     marker=dict(
                         color=yqs,
-                        colorscale = "Jet",
+                        colorscale="Jet",
                         cmax=yqs.max().item(),
                         cmin=yqs.min().item(),
                         colorbar=dict(
-                            x=0.65,
+                            x=0.64,
                             len=colorbar_len,
                             y=colorbar_y
                         ),
@@ -152,19 +162,21 @@ class BHM_PLOTTER():
                 row=1,
                 col=2
             )
+
         # Add variance plot
         fig.add_trace(
             go.Scatter3d(
-                x=Xqs[1:,0],
-                y=Xqs[1:,1],
-                z=Xqs[1:,2],
+                x=Xqs[1:, 0],
+                y=Xqs[1:, 1],
+                z=Xqs[1:, 2],
                 mode='markers',
                 marker=dict(
                     color=vars,
-                    colorscale = "Jet",
+                    colorscale="Jet",
                     cmax=vars.max().item(),
                     cmin=vars.min().item(),
                     colorbar=dict(
+                        x=0.74,
                         len=colorbar_len,
                         y=colorbar_y
                     ),
@@ -175,6 +187,40 @@ class BHM_PLOTTER():
             row=1,
             col=3
         )
+
+        xx = []
+        yy = []
+        zz = []
+        fn_train, cell_max_min, cell_resolution = utils_filereader.format_config(self.args)
+        g, X, y_occupancy, sigma, partitions = utils_filereader.read_frame(self.args, iframe, fn_train, cell_max_min)
+        for i, segi in enumerate(partitions):
+            # query the model
+            xx.extend(torch.arange(segi[0], segi[1], self.args.query_dist[0]).tolist())
+            yy.extend(torch.arange(segi[2], segi[3], self.args.query_dist[1]).tolist())
+            zz.extend(torch.arange(segi[4], segi[5], self.args.query_dist[2]).tolist())
+
+        surface = yqs.reshape((len(xx), len(yy), len(zz))).numpy()
+        mcubes_mesh = trimesh.voxel.ops.matrix_to_marching_cubes(surface)
+        trimesh.exchange.export.export_mesh(mcubes_mesh, "plots/surface/ply_files/out.stl", file_type='stl')
+
+        vertices, simplices, normals, values = measure.marching_cubes_lewiner(surface)
+        x, y, z = zip(*vertices)
+        # rescale to center at zero
+        # x -= max(x)/2
+        # y -= max(y)/2
+        # z -= max(z)/2
+
+        # Add plot for marching cubes
+        fig_mcubes = ff.create_trisurf(
+            x=x,
+            y=y,
+            z=z,
+            show_colorbar=True,
+            plot_edges=True,
+            simplices=simplices,
+        )
+
+        fig.add_trace(fig_mcubes.data[0], row=1, col=4)
 
     def plot_hits_surface(self, X, fig):
         """
@@ -317,30 +363,29 @@ class BHM_PLOTTER():
         @param: X 3D coordinates for each lidar observation
         @param: y occupancy observed by lidar
         @param: i frame i
-
         @returns: []
-
         Plots a single frame (i) of occupancy BHM predictions and LIDAR observations
         """
         time1 = time.time()
-        specs = [[{"type": "scene"}, {"type": "scene"}, {"type": "scene"}]]
-        titles = ['Lidar Hits', 'Occupancy Prediction', 'Variance']
+        specs = [[{"type": "scene"}, {"type": "scene"}, {"type": "scene"}, {"type": "scene"}]]
+        titles = ['Lidar Hits', 'Occupancy Prediction', 'Variance', 'Marching cubes']
         fig = make_subplots(
             rows=1,
-            cols=3,
+            cols=4,
             specs=specs,
             subplot_titles=titles
         )
         self.plot_lidar_hits(X, y, fig)
-        self.plot_predictions(toPlot, fig)
+        self.plot_predictions(toPlot, fig, i)
         camera = dict(
             eye=dict(x=2.25, y=-2.25, z=1.25)
         )
         fig.layout.scene1.camera = camera
         fig.layout.scene2.camera = camera
         fig.layout.scene3.camera = camera
+        fig.layout.scene4.camera = camera
         fig.update_layout(title='{}_occupancy_frame{}'.format(self.plot_title, i), height=800)
-        plotly.offline.plot(fig, filename=os.path.abspath('./plots/occupancy/{}_frame{}.html'.format(self.plot_title, i)), auto_open=True)
+        plotly.offline.plot(fig, filename=os.path.abspath('./plots/surface/{}_frame{}.html'.format(self.plot_title, i)), auto_open=True)
         print('Completed plotting in %2f s' % (time.time()-time1))
 
     def plot_regression_frame(self, meanVarPlot, X, i, cell_max_min):

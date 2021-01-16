@@ -66,7 +66,7 @@ def load_mdl(args, path, type):
             raise ValueError("Unsupported likelihood type: \"{}\"".format(args.likelihood_type))
 
     else:
-        raise ValueError("Unknown model type: \"{}\"".format(mdl_type))
+        raise ValueError("Unknown model type: \"{}\"".format(type))
     # model.updateMuSig(model_params['mu'], model_params['sig'])
     return model, model_params['train_time']
 
@@ -108,7 +108,7 @@ def query_occupancy(args, partitions, X, y, framei):
     num_segments = len(partitions)
     for i, segi in enumerate(partitions):
         print(' Querying segment {} of {}...'.format(i+1, num_segments))
-        bhm_mdl = load_mdl(args, 'occupancy/{}_f{}_p{}'.format(args.save_model_path, framei, i), 'BHM3D_PYTORCH')
+        bhm_mdl, train_time = load_mdl(args, 'occupancy/{}_f{}_p{}'.format(args.save_model_path, framei, i), 'BHM3D_PYTORCH')
         # query the model
         xx, yy, zz = torch.meshgrid(
             torch.arange(segi[0], segi[1], args.query_dist[0]),
@@ -136,7 +136,7 @@ def query_regression(args, cell_max_min, X, y_occupancy, g, framei):
     Runs and plots regression for a single time frame (framei) given input
     parameters
     """
-    bhm_regression_mdl = load_mdl(args, 'regression/{}_f{}'.format(args.save_model_path, framei), 'BHM_REGRESSION_PYTORCH')
+    bhm_regression_mdl, train_time = load_mdl(args, 'regression/{}_f{}'.format(args.save_model_path, framei), 'BHM_REGRESSION_PYTORCH')
     # filter X,y such that only give the X's where y is 1
     filtered = g[(y_occupancy[:,0]==1),:]
     print(" Querying regression BHM ...")
