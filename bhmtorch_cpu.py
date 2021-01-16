@@ -500,43 +500,46 @@ class BHM_VELOCITY_PYTORCH:
                         sig2_inv_a_y[start:end, start2:end2] = 1/self.beta + Xq[start:end].mm(self.sig_y).mm(Xq[start2:end2].t())
                         sig2_inv_a_z[start:end, start2:end2] = 1/self.beta + Xq[start:end].mm(self.sig_z).mm(Xq[start2:end2].t())
 
-            mu_a_x_ = Xq.mm(self.mu_x.reshape(-1, 1))#.squeeze()
-            sig2_inv_a_x_ = 1/self.beta + Xq.mm(self.sig_x).mm(Xq.t()) # (635, 2508) X (2508, 2508) --> (635, 2508), then (635, 2508) X (2508, 625) --> (635, 635)
-            mu_a_y_ = Xq.mm(self.mu_y.reshape(-1, 1))#.squeeze()
-            sig2_inv_a_y_ = 1/self.beta + Xq.mm(self.sig_y).mm(Xq.t())
-            mu_a_z_ = Xq.mm(self.mu_z.reshape(-1, 1))#.squeeze()
-            sig2_inv_a_z_ = 1/self.beta + Xq.mm(self.sig_z).mm(Xq.t())
 
-            assert torch.all(torch.eq(mu_a_x_, mu_a_x))
-            assert torch.all(torch.eq(mu_a_y_, mu_a_y))
-            assert torch.all(torch.eq(mu_a_z_, mu_a_z))
-
-            if variance_only:
-                print("VARIANCE ONLY (debuging asserts)")
-
-                print("torch.allclose(torch.diag(sig2_inv_a_x_), sig2_inv_a_x):", torch.allclose(torch.diag(sig2_inv_a_x_), sig2_inv_a_x))
-                print("torch.allclose(torch.diag(sig2_inv_a_y_), sig2_inv_a_y):", torch.allclose(torch.diag(sig2_inv_a_y_), sig2_inv_a_y))
-                print("torch.allclose(torch.diag(sig2_inv_a_z_), sig2_inv_a_z):", torch.allclose(torch.diag(sig2_inv_a_z_), sig2_inv_a_z))
-
-                print("torch.diag(sig2_inv_a_x_).shape:", torch.diag(sig2_inv_a_x_).shape)
-                print("sig2_inv_a_x.shape:", sig2_inv_a_x.shape)
-
-                assert torch.allclose(torch.diag(sig2_inv_a_x_), sig2_inv_a_x)
-                assert torch.allclose(torch.diag(sig2_inv_a_y_), sig2_inv_a_y)
-                assert torch.allclose(torch.diag(sig2_inv_a_z_), sig2_inv_a_z)
-            else:
-                print("NO VARIANCE ONLY (debuging asserts)")
-
-                print("torch.allclose(sig2_inv_a_x_, sig2_inv_a_x):", torch.allclose(sig2_inv_a_x_, sig2_inv_a_x))
-                print("torch.allclose(sig2_inv_a_y_, sig2_inv_a_y):", torch.allclose(sig2_inv_a_y_, sig2_inv_a_y))
-                print("torch.allclose(sig2_inv_a_z_, sig2_inv_a_z):", torch.allclose(sig2_inv_a_z_, sig2_inv_a_z))
-
-                print("sig2_inv_a_x_.shape:", sig2_inv_a_x_.shape)
-                print("sig2_inv_a_x.shape:", sig2_inv_a_x.shape)
-
-                assert torch.allclose(sig2_inv_a_x_, sig2_inv_a_x)
-                assert torch.allclose(sig2_inv_a_y_, sig2_inv_a_y)
-                assert torch.allclose(sig2_inv_a_z_, sig2_inv_a_z)
+            # ### DEBUGGING, DELETE ME WHEN DONE ###
+            # mu_a_x_ = Xq.mm(self.mu_x.reshape(-1, 1))#.squeeze()
+            # sig2_inv_a_x_ = 1/self.beta + Xq.mm(self.sig_x).mm(Xq.t()) # (635, 2508) X (2508, 2508) --> (635, 2508), then (635, 2508) X (2508, 625) --> (635, 635)
+            # mu_a_y_ = Xq.mm(self.mu_y.reshape(-1, 1))#.squeeze()
+            # sig2_inv_a_y_ = 1/self.beta + Xq.mm(self.sig_y).mm(Xq.t())
+            # mu_a_z_ = Xq.mm(self.mu_z.reshape(-1, 1))#.squeeze()
+            # sig2_inv_a_z_ = 1/self.beta + Xq.mm(self.sig_z).mm(Xq.t())
+            #
+            # assert torch.all(torch.eq(mu_a_x_, mu_a_x))
+            # assert torch.all(torch.eq(mu_a_y_, mu_a_y))
+            # assert torch.all(torch.eq(mu_a_z_, mu_a_z))
+            #
+            # if variance_only:
+            #     print("VARIANCE ONLY (debuging asserts)")
+            #
+            #     print("torch.allclose(torch.diag(sig2_inv_a_x_), sig2_inv_a_x):", torch.allclose(torch.diag(sig2_inv_a_x_), sig2_inv_a_x))
+            #     print("torch.allclose(torch.diag(sig2_inv_a_y_), sig2_inv_a_y):", torch.allclose(torch.diag(sig2_inv_a_y_), sig2_inv_a_y))
+            #     print("torch.allclose(torch.diag(sig2_inv_a_z_), sig2_inv_a_z):", torch.allclose(torch.diag(sig2_inv_a_z_), sig2_inv_a_z))
+            #
+            #     print("torch.diag(sig2_inv_a_x_).shape:", torch.diag(sig2_inv_a_x_).shape)
+            #     print("sig2_inv_a_x.shape:", sig2_inv_a_x.shape)
+            #
+            #     assert torch.allclose(torch.diag(sig2_inv_a_x_), sig2_inv_a_x)
+            #     assert torch.allclose(torch.diag(sig2_inv_a_y_), sig2_inv_a_y)
+            #     assert torch.allclose(torch.diag(sig2_inv_a_z_), sig2_inv_a_z)
+            # else:
+            #     print("NO VARIANCE ONLY (debuging asserts)")
+            #
+            #     print("torch.allclose(sig2_inv_a_x_, sig2_inv_a_x):", torch.allclose(sig2_inv_a_x_, sig2_inv_a_x))
+            #     print("torch.allclose(sig2_inv_a_y_, sig2_inv_a_y):", torch.allclose(sig2_inv_a_y_, sig2_inv_a_y))
+            #     print("torch.allclose(sig2_inv_a_z_, sig2_inv_a_z):", torch.allclose(sig2_inv_a_z_, sig2_inv_a_z))
+            #
+            #     print("sig2_inv_a_x_.shape:", sig2_inv_a_x_.shape)
+            #     print("sig2_inv_a_x.shape:", sig2_inv_a_x.shape)
+            #
+            #     assert torch.allclose(sig2_inv_a_x_, sig2_inv_a_x)
+            #     assert torch.allclose(sig2_inv_a_y_, sig2_inv_a_y)
+            #     assert torch.allclose(sig2_inv_a_z_, sig2_inv_a_z)
+            # ### END DEBUGGING ###
 
         return mu_a_x, sig2_inv_a_x, mu_a_y, sig2_inv_a_y, mu_a_z, sig2_inv_a_z
 
