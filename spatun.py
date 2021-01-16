@@ -168,6 +168,7 @@ if __name__ == '__main__':
     parser.add_argument('--query_dist', nargs=3, type=float, help='X Y Z Q-resolution (3 values). If any value is\
         negative, a 4th value should be provided to slice the corresponding axis. If all negative, X_query=X_train.')
     parser.add_argument('--query_blocks', type=int, default=None, help='How many blocks to break the query method into')
+    parser.add_argument('--variance_only', action="store_true", default=False, help='Only calculate the diagonal of the covariance matrix')
     parser.add_argument('--eval_path', type=str, help='Path of the evaluation dataset')
     parser.add_argument('--eval', type=int, help='1=evaluate metrics, 0, otherwise. Use data in --eval_path, if given.')
     parser.add_argument('--save_query_data_path', type=str, help='Path save each set of queried data \
