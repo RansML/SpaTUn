@@ -201,14 +201,14 @@ class BHM_PLOTTER():
 
         surface = yqs.reshape((len(xx), len(yy), len(zz))).numpy()
         mcubes_mesh = trimesh.voxel.ops.matrix_to_marching_cubes(surface)
-        trimesh.exchange.export.export_mesh(mcubes_mesh, "plots/surface/ply_files/out.stl", file_type='stl')
+        trimesh.exchange.export.export_mesh(mcubes_mesh, "plots/surface/out.stl", file_type='stl')
 
-        vertices, simplices, normals, values = measure.marching_cubes_lewiner(surface)
+        vertices, simplices, normals, values = measure.marching_cubes_lewiner(surface, level=None, spacing=(self.query_dist[0], self.query_dist[1], self.query_dist[2]))
         x, y, z = zip(*vertices)
         # rescale to center at zero
-        # x -= max(x)/2
-        # y -= max(y)/2
-        # z -= max(z)/2
+        x -= max(x)/2
+        y -= max(y)/2
+        z -= max(z)/2
 
         # Add plot for marching cubes
         fig_mcubes = ff.create_trisurf(
