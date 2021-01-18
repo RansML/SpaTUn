@@ -1,5 +1,5 @@
 # SpaTUn: Spatio-Temporal Uncertainty
-
+![SpaTUn](./SpaTUn.png?raw=true "SpaTUn")
 ![Alt text](./plots/Regression_sample.png?raw=true "Regression Sample")
 ![Alt text](./plots/Occupancy_sample.png?raw=true "Classification Sample")
 
