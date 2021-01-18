@@ -76,7 +76,7 @@ class BHM_PLOTTER():
                     cmax=y.max().item(),
                     cmin=y.min().item(),
                     colorbar=dict(
-                        x=0.28,
+                        x=0.24,
                         len=colorbar_len,
                         y=colorbar_y
                     ),
@@ -128,7 +128,7 @@ class BHM_PLOTTER():
                     colorscale="Jet",
                     opacityscale=[[0, 0], [self.surface_threshold[0], 0], [1, 1]],
                     colorbar=dict(
-                        x=0.46,
+                        x=0.47,
                         len=colorbar_len,
                         y=colorbar_y
                     ),
@@ -188,6 +188,15 @@ class BHM_PLOTTER():
             col=3
         )
 
+    def plot_marching_cubes(self, toPlot, fig, iframe):
+        yqs = torch.ones(1)
+        for ploti in toPlot:
+            if self.surface_threshold[0] > 0:
+                ploti = self.filter_predictions(ploti)
+            Xq, yq = ploti[0], ploti[1]
+            if Xq.shape[0] <= 1: continue
+            yqs = torch.cat((yqs, yq), dim=0)
+        yqs = yqs[1:]
         xx = []
         yy = []
         zz = []
@@ -203,7 +212,7 @@ class BHM_PLOTTER():
         mcubes_mesh = trimesh.voxel.ops.matrix_to_marching_cubes(surface)
         trimesh.exchange.export.export_mesh(mcubes_mesh, "plots/surface/out.stl", file_type='stl')
 
-        vertices, simplices, normals, values = measure.marching_cubes_lewiner(surface, level=None, spacing=(self.query_dist[0], self.query_dist[1], self.query_dist[2]))
+        vertices, simplices, normals, values = measure.marching_cubes(surface, level=None, spacing=(self.query_dist[0], self.query_dist[1], self.query_dist[2]))
         x, y, z = zip(*vertices)
         # rescale to center at zero
         x -= max(x)/2
@@ -377,8 +386,9 @@ class BHM_PLOTTER():
         )
         self.plot_lidar_hits(X, y, fig)
         self.plot_predictions(toPlot, fig, i)
+        self.plot_marching_cubes(toPlot, fig, i)
         camera = dict(
-            eye=dict(x=2.25, y=-2.25, z=1.25)
+            eye=dict(x=3.2, y=-3.2, z=3.2)
         )
         fig.layout.scene1.camera = camera
         fig.layout.scene2.camera = camera
