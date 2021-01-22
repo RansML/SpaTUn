@@ -42,7 +42,7 @@ def load_query_data(path):
 # ==============================================================================
 # Train
 # ==============================================================================
-def train(fn_train, cell_max_min, cell_resolution):
+def train(fn_train, cell_max_min, cell_resolution, args):
     """
     @params: [fn_train, cell_max_min, cell_resolution]
     @returns: []
@@ -79,7 +79,7 @@ def train(fn_train, cell_max_min, cell_resolution):
 # ==============================================================================
 # Query
 # ==============================================================================
-def query(fn_train, cell_max_min):
+def query(fn_train, cell_max_min, args):
     """
     @params: [fn_train, cell_max_min]
     @returns: []
@@ -112,7 +112,7 @@ def query(fn_train, cell_max_min):
 # ==============================================================================
 # Plot
 # ==============================================================================
-def plot():
+def plot(args):
     """
     @params: []
     @returns: []
@@ -137,82 +137,48 @@ def plot():
     print('Plotting completed---------------\n')
 
 
-
 # ==============================================================================
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+# Interface with Spatun without parser
+# ==============================================================================
+class Spatun():
+    def __init__(self, config_file, save_config, spatun_path="."):
+        self.spatun_path = spatun_path
+        self.args = argparse.Namespace(config=config_file, save_config=save_config)
+        self.load_config()
+    
+    def save_config(self):
+        with open(self.spatun_path + '/configs/' + self.args.save_config, 'w') as f:
+            json.dump(self.args.__dict__, f, indent=2)
 
-    # Settings Arguments
-    parser.add_argument('--mode', type=str, help='tqp: Train Query and Plot, to: Train only, qo: Query only, po: Plot only')
-    parser.add_argument('--num_frames', type=int, help='Number of data frames')
-    parser.add_argument('--config', type=str, help='Path to the config to load relative to the config folder')
-    parser.add_argument('--save_config', type=str, help='Saves the argparse config to path if set relative to the config folder')
+    def load_config(self):
+        config = json.load(open(self.spatun_path + '/configs/' + self.args.config, 'r'))
+        defaults = json.load(open(self.spatun_path + '/configs/defaults', 'r'))
 
-    # Train Arguments
-    parser.add_argument('--model_type', type=str, help='Model type (occupancy vs regression)')
-    parser.add_argument('--likelihood_type', type=str, help='Likelihood type (Gamma, Gaussian)')
-    parser.add_argument('--dataset_path', type=str, help='Path to dataset')
-    parser.add_argument('--area_min', nargs=3, type=int, help='X Y Z minimum coordinates in bounding box (3 values)')
-    parser.add_argument('--area_max', nargs=3, type=int, help='X Y Z maximum coordinates in bounding box (3 values)')
-    parser.add_argument('--hinge_dist', nargs=3, type=int, help='X Y Z hinge point resolution (3 values)')
-    parser.add_argument('--kernel_type', type=str, help='Type of RBF kernel: Vanilla RBF(), Convolution (conv), Wasserstein (wass)')
-    parser.add_argument('--gamma', nargs='+', type=float, help='X Y Z Gamma (1-3 values)')
-    parser.add_argument('--num_partitions', nargs=3, type=int, help='X Y Z number of partitions per axis (3 values)')
-    parser.add_argument('--partition_bleed', type=float, help='Amount of bleed between partitions for plot stitching')
-    parser.add_argument('--save_model_path', type=str, help='Path to save each model \
-        (i.e. save_model_path is set to \"toy3_run0\", then the model at partition 1, frame 1 would save to \
-        mdls/occupancy/toy3_run0_f1_p1)'
-    )
-
-    # Query Arguments
-    parser.add_argument('--query_dist', nargs=3, type=float, help='X Y Z Q-resolution (3 values). If any value is\
-        negative, a 4th value should be provided to slice the corresponding axis. If all negative, X_query=X_train.')
-    parser.add_argument('--query_blocks', type=int, default=None, help='How many blocks to break the query method into')
-    parser.add_argument('--variance_only', action="store_true", default=False, help='Only calculate the diagonal of the covariance matrix')
-    parser.add_argument('--eval_path', type=str, help='Path of the evaluation dataset')
-    parser.add_argument('--eval', type=int, help='1=evaluate metrics, 0, otherwise. Use data in --eval_path, if given.')
-    parser.add_argument('--save_query_data_path', type=str, help='Path save each set of queried data \
-        (i.e. save_model_path is set to \"toy3_run0\" and the model type is set to occupancy, \
-        then the model at frame 1 would save to query_data/occupancy/toy3_run0_f1_p1)'
-    )
-
-    # Plot Arguments
-    parser.add_argument('--occupancy_plot_type', type=str, help='Plot occupancy as scatter or volumetric plot')
-    parser.add_argument('--plot_title', type=str, help='')
-    parser.add_argument('--surface_threshold', nargs=2, type=float, help='Minimum threshold to show surface prediction on plot. Min or [Min, Max]')
-
-    args = parser.parse_args()
-    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-
-    # Set arguments according to the following Priority (High->Low):
-    # 1:CL provided arguments, 2: config provided arguments, 3:default arguments
-    if args.config:
-        config = json.load(open('./configs/' + args.config, 'r'))
-        defaults = json.load(open('./configs/defaults', 'r'))
-        for key in vars(args):
+        for key in defaults:
             if key == 'save_config': continue
-            if getattr(args, key): continue
             if key in config and config[key]:
-                args.__dict__[key] = config[key]
+                self.args.__dict__[key] = config[key]
             else:
-                args.__dict__[key] = defaults[key]
-    if args.save_config:
-        with open('./configs/' + args.save_config, 'w') as f:
-            json.dump(args.__dict__, f, indent=2)
-    assert len(args.gamma) <= 3, 'Cannot support gamma with greater than dimension 3.'
-
-    fn_train, cell_max_min, cell_resolution = utils_filereader.format_config(args)
-    if args.mode == 'tqp' or args.mode == 't':
-        train(fn_train, cell_max_min, cell_resolution)
-    if args.mode == 'tqp' or args.mode == 'q':
-        query(fn_train, cell_max_min)
-    if args.mode == 'tqp' or args.mode == 'p':
-        plot()
-    if args.mode == 'tq':
-        train(fn_train, cell_max_min, cell_resolution)
-        query(fn_train, cell_max_min)
-    if args.mode == 'qp':
-        query(fn_train, cell_max_min)
-        plot()
-
-    print("Mission complete!\n\n")
+                self.args.__dict__[key] = defaults[key]
+        
+        if self.args.save_config:
+            self.save_config()
+        assert len(self.args.gamma) <= 3, 'Cannot support gamma with greater than dimension 3.'
+        self.fn_train, self.cell_max_min, self.cell_resolution = utils_filereader.format_config(self.args)
+    
+    def update_config(self, key, val):
+        self.args.__dict__[key] = val
+        if self.args.save_config:
+            self.save_config()
+        self.fn_train, self.cell_max_min, self.cell_resolution = utils_filereader.format_config(self.args)
+    
+    def train(self, new_dataset=""):
+        if new_dataset:
+            self.update_config("dataset_path", new_dataset)
+        train(self.fn_train, self.cell_max_min, self.cell_resolution, self.args)
+        
+    def query(self):
+        query(self.fn_train, self.cell_max_min, self.args)
+    
+    def plot(self):
+        plot(self.args)
