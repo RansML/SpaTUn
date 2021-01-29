@@ -1,0 +1,23 @@
+{
+  "mode": "tqp",
+  "num_frames": 1,
+  "config": "",
+  "save_config": "./jpl_boulder_clip_regression",
+
+  "model_type": "regression",
+  "likelihood_type":"gaussian",
+  "dataset_path": "./datasets/jpl/jpl_boulder_clip",
+  "area_min": [-20,-20,-2],
+  "area_max": [20,20,5],
+  "hinge_dist": [3,3,3],
+  "kernel_type": "conv",
+  "gamma": [0.06],
+  "num_partitions": [3,3,3],
+  "partition_bleed": 0.25,
+
+  "query_dist": [0.5,0.5,0.5],
+
+  "occupancy_plot_type": "scatter"
+  "plot_title": "jpl_boulder_clip",
+  "surface_threshold": 0.05,
+}

@@ -1,5 +1,5 @@
 {
-  "dataset_path": "./datasets/toy/toy",
+  "dataset_path": "../datasets/toy/toy",
   "plot_title": "toy",
   "surface_threshold": 0.05,
   "num_frames": 1,

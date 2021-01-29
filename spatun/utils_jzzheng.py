@@ -12,6 +12,7 @@ import plotly.graph_objects as go
 from plotly.offline import plot
 import plotly.graph_objs as go
 
+# TODO: Update path after making modules
 AIRSIM_DATASET = 'datasets/airsim/depth_data.csv'  # this only contains one time frame
 CARLA_DATASET = 'datasets/carla/carla_3d_town1.npz'
 

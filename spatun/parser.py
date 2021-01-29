@@ -81,8 +81,8 @@ if __name__ == '__main__':
     # Set arguments according to the following Priority (High->Low):
     # 1:CL provided arguments, 2: config provided arguments, 3:default arguments
     if args.config:
-        config = json.load(open('./configs/' + args.config, 'r'))
-        defaults = json.load(open('./configs/defaults', 'r'))
+        config = json.load(open('../configs/' + args.config, 'r'))
+        defaults = json.load(open('../configs/defaults', 'r'))
         for key in vars(args):
             if key == 'save_config': continue
             if getattr(args, key): continue
@@ -91,7 +91,7 @@ if __name__ == '__main__':
             else:
                 args.__dict__[key] = defaults[key]
     if args.save_config:
-        with open('./configs/' + args.save_config, 'w') as f:
+        with open('../configs/' + args.save_config, 'w') as f:
             json.dump(args.__dict__, f, indent=2)
     assert len(args.gamma) <= 3, 'Cannot support gamma with greater than dimension 3.'
 
