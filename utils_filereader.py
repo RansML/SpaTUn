@@ -13,23 +13,34 @@ def format_config(args):
     """
     Formats default parameters from argparse to be easily digested by module
     """
-    # default parameter to reduce min and max bounds of cell_max_min
-    delta = (args.area_max[0] - args.area_min[0])*0.03
-
     fn_train = os.path.abspath(args.dataset_path)
+
+    #Calculate area_min and area_max if none provided (default)
+    if args.area_min == args.area_max:
+        data = pd.read_csv(fn_train+'.csv').to_numpy() #['', 't', 'X', 'Y', 'Z', 'occupancy', 'sig_x', 'sig_y', 'sig_z']
+        args.area_min = [np.amin(data, axis=0)[2], np.amin(data, axis=0)[3], np.amin(data, axis=0)[4]]
+        args.area_max = [np.amax(data, axis=0)[2], np.amax(data, axis=0)[3], np.amax(data, axis=0)[4]]
+
+    # default parameter to increase min and max bounds of cell_max_min
+    ranges = [args.area_max[0] - args.area_min[0], args.area_max[1] - args.area_min[1], args.area_max[2] - args.area_min[2]]
+    max_range = max(ranges)
+    delta = (max_range)*0.5
+
+    cell_max_min = [
+        args.area_min[0] - delta,
+        args.area_max[0] + delta,
+        args.area_min[1] - delta,
+        args.area_max[1] + delta,
+        args.area_min[2] - delta,
+        args.area_max[2] + delta
+    ]
+
+
     cell_resolution = (
         args.hinge_dist[0],
         args.hinge_dist[1],
         args.hinge_dist[2]
     )
-    cell_max_min = [
-        args.area_min[0] + delta,
-        args.area_max[0] - delta,
-        args.area_min[1] + delta,
-        args.area_max[1] - delta,
-        args.area_min[2] + delta,
-        args.area_max[2] - delta
-    ]
     return fn_train, cell_max_min, cell_resolution
 
 def get3DPartitions(args, cell_max_min, nPartx1, nPartx2, nPartx3):
