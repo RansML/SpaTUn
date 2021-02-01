@@ -17,7 +17,7 @@
   "partition_bleed": 0.25,
   "save_model_path": "tmp",
 
-  "query_dist": [0.1,0.1,0.1],
+  "query_dist": [0.1,0.1,-0.1, 1],
   "query_blocks": 1,
   "variance_only": false,
   "eval_path": "",

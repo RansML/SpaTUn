@@ -91,9 +91,10 @@ def save_query_data(data, path):
     torch.save(data, filename)
     print( ' Saving queried output as ' + filename)
 
-def query_occupancy(args, partitions, X, y, framei):
+def query_occupancy(args, cell_max_min, partitions, X, y, framei):
     """
     @params: partitions (array of tuple of ints)
+    @params: cell_max_min (tuple of 6 ints) - bounding area observed
     @params: X (float32 tensor)
     @params: y (float32 tensor)
     @params: framei (int) - the index of the current frame being read
@@ -105,21 +106,96 @@ def query_occupancy(args, partitions, X, y, framei):
     """
     totalTime = 0
     occupancyPlot = []
-    num_segments = len(partitions)
-    for i, segi in enumerate(partitions):
-        print(' Querying segment {} of {}...'.format(i+1, num_segments))
-        bhm_mdl, train_time = load_mdl(args, 'occupancy/{}_f{}_p{}'.format(args.save_model_path, framei, i), 'BHM3D_PYTORCH')
-        # query the model
-        xx, yy, zz = torch.meshgrid(
-            torch.arange(segi[0], segi[1], args.query_dist[0]),
-            torch.arange(segi[2], segi[3], args.query_dist[1]),
-            torch.arange(segi[4], segi[5], args.query_dist[2])
-        )
-        Xq = torch.stack([xx.flatten(), yy.flatten(), zz.flatten()], dim=1)
+    if args.query_dist[0] <= 0 or args.query_dist[1] <= 0 or args.query_dist[2] <= 0:
+        bhm_mdl, train_time = load_mdl(args, 'occupancy/{}_f{}_p{}'.format(args.save_model_path, framei, 0), 'BHM3D_PYTORCH')
+        #if at least one q_res is non-positive, then
+        if args.query_dist[0] <= 0: #x-slice
+            print(" Query data is x={} slice ".format(args.query_dist[3]))
+            xx, yy, zz = torch.meshgrid(
+                torch.arange(
+                    args.query_dist[3],
+                    args.query_dist[3] + 0.1,
+                    1
+                ),
+                torch.arange(
+                    cell_max_min[2],
+                    cell_max_min[3] + args.query_dist[1],
+                    args.query_dist[1]
+                ),
+                torch.arange(
+                    cell_max_min[4],
+                    cell_max_min[5] + args.query_dist[2],
+                    args.query_dist[2]
+                )
+            )
+            Xq = torch.stack([xx.flatten(), yy.flatten(), zz.flatten()], dim=1)
+            option = 'X slice at '.format(args.query_dist[3])
+        elif args.query_dist[1] <= 0: #y-slice
+            print("Query data is y={} slice ".format(args.query_dist[3]))
+            xx, yy, zz = torch.meshgrid(
+                torch.arange(
+                    cell_max_min[0],
+                    cell_max_min[1] + args.query_dist[0],
+                    args.query_dist[0]
+                ),
+                torch.arange(
+                    args.query_dist[3],
+                    args.query_dist[3] + 0.1,
+                    1
+                ),
+                torch.arange(
+                    cell_max_min[4],
+                    cell_max_min[5] + args.query_dist[2],
+                    args.query_dist[2]
+                )
+            )
+            Xq = torch.stack([xx.flatten(), yy.flatten(), zz.flatten()], dim=1)
+            option = 'Y slice at '.format(args.query_dist[3])
+        else: #z-slice
+            print("Query data is z={} slice ".format(args.query_dist[3]))
+            xx, yy, zz = torch.meshgrid(
+                torch.arange(
+                    cell_max_min[0],
+                    cell_max_min[1] + args.query_dist[0],
+                    args.query_dist[0]
+                ),
+                torch.arange(
+                    cell_max_min[2],
+                    cell_max_min[3] + args.query_dist[1],
+                    args.query_dist[1]
+                ),
+                torch.arange(
+                    args.query_dist[3],
+                    args.query_dist[3] + 0.1,
+                    1
+                )
+            )
+            Xq = torch.stack([xx.flatten(), yy.flatten(), zz.flatten()], dim=1)
+            option = 'Z slice at '.format(args.query_dist[3])
+
         time1 = time.time()
         yq, var = bhm_mdl.predict(Xq)
         totalTime += time.time()-time1
         occupancyPlot.append((Xq,yq,var))
+    else:
+        num_segments = len(partitions)
+        for i, segi in enumerate(partitions):
+            print(' Querying segment {} of {}...'.format(i+1, num_segments))
+            bhm_mdl, train_time = load_mdl(args, 'occupancy/{}_f{}_p{}'.format(args.save_model_path, framei, i), 'BHM3D_PYTORCH')
+            # query the model
+            xx, yy, zz = torch.meshgrid(
+                torch.arange(segi[0], segi[1], args.query_dist[0]),
+                torch.arange(segi[2], segi[3], args.query_dist[1]),
+                torch.arange(segi[4], segi[5], args.query_dist[2])
+            )
+            Xq = torch.stack([xx.flatten(), yy.flatten(), zz.flatten()], dim=1)
+            time1 = time.time()
+            yq, var = bhm_mdl.predict(Xq)
+            totalTime += time.time()-time1
+            occupancyPlot.append((Xq,yq,var))
+        option = 'grid'
+
+
     print(' Total querying time={} s'.format(round(totalTime, 2)))
     save_query_data((occupancyPlot, X, y, framei), 'occupancy/{}_f{}'.format(args.save_query_data_path, framei))
 

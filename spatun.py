@@ -95,7 +95,7 @@ def query(fn_train, cell_max_min):
             raise ValueError("Unknown model type: \"{}\"".format(args.model_type))
 
         if args.model_type == 'occupancy':
-            query_methods.query_occupancy(args, partitions, X, y_occupancy, framei)
+            query_methods.query_occupancy(args, cell_max_min, partitions, X, y_occupancy, framei)
         elif args.model_type == 'regression':
             query_methods.query_regression(args, cell_max_min, X, y_occupancy, g, framei)
         elif args.model_type == "velocity": ###===###

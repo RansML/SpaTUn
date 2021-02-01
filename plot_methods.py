@@ -189,47 +189,49 @@ class BHM_PLOTTER():
         )
 
     def plot_marching_cubes(self, toPlot, fig, iframe):
-        yqs = torch.ones(1)
-        for ploti in toPlot:
-            if self.surface_threshold[0] > 0:
-                ploti = self.filter_predictions(ploti)
-            Xq, yq = ploti[0], ploti[1]
-            if Xq.shape[0] <= 1: continue
-            yqs = torch.cat((yqs, yq), dim=0)
-        yqs = yqs[1:]
-        xx = []
-        yy = []
-        zz = []
-        fn_train, cell_max_min, cell_resolution = utils_filereader.format_config(self.args)
-        g, X, y_occupancy, sigma, partitions = utils_filereader.read_frame(self.args, iframe, fn_train, cell_max_min)
-        for i, segi in enumerate(partitions):
-            # query the model
-            xx.extend(torch.arange(segi[0], segi[1], self.args.query_dist[0]).tolist())
-            yy.extend(torch.arange(segi[2], segi[3], self.args.query_dist[1]).tolist())
-            zz.extend(torch.arange(segi[4], segi[5], self.args.query_dist[2]).tolist())
+        if self.args.query_dist[0] > 0 and self.args.query_dist[1] > 0 and self.args.query_dist[2] > 0:
+            #if all query-distances are positive, then we have no slices and can proceed with marching cubes
+            yqs = torch.ones(1)
+            for ploti in toPlot:
+                if self.surface_threshold[0] > 0:
+                    ploti = self.filter_predictions(ploti)
+                Xq, yq = ploti[0], ploti[1]
+                if Xq.shape[0] <= 1: continue
+                yqs = torch.cat((yqs, yq), dim=0)
+            yqs = yqs[1:]
+            xx = []
+            yy = []
+            zz = []
+            fn_train, cell_max_min, cell_resolution = utils_filereader.format_config(self.args)
+            g, X, y_occupancy, sigma, partitions = utils_filereader.read_frame(self.args, iframe, fn_train, cell_max_min)
+            for i, segi in enumerate(partitions):
+                # query the model
+                xx.extend(torch.arange(segi[0], segi[1], self.args.query_dist[0]).tolist())
+                yy.extend(torch.arange(segi[2], segi[3], self.args.query_dist[1]).tolist())
+                zz.extend(torch.arange(segi[4], segi[5], self.args.query_dist[2]).tolist())
 
-        surface = yqs.reshape((len(xx), len(yy), len(zz))).numpy()
-        mcubes_mesh = trimesh.voxel.ops.matrix_to_marching_cubes(surface)
-        trimesh.exchange.export.export_mesh(mcubes_mesh, "plots/surface/out.stl", file_type='stl')
+            surface = yqs.reshape((len(xx), len(yy), len(zz))).numpy()
+            mcubes_mesh = trimesh.voxel.ops.matrix_to_marching_cubes(surface)
+            trimesh.exchange.export.export_mesh(mcubes_mesh, "plots/surface/out.stl", file_type='stl')
 
-        vertices, simplices, normals, values = measure.marching_cubes(surface, level=None, spacing=(self.query_dist[0], self.query_dist[1], self.query_dist[2]))
-        x, y, z = zip(*vertices)
-        # rescale to center at zero
-        x -= max(x)/2
-        y -= max(y)/2
-        z -= max(z)/2
+            vertices, simplices, normals, values = measure.marching_cubes(surface, level=None, spacing=(self.query_dist[0], self.query_dist[1], self.query_dist[2]))
+            x, y, z = zip(*vertices)
+            # rescale to center at zero
+            x -= max(x)/2
+            y -= max(y)/2
+            z -= max(z)/2
 
-        # Add plot for marching cubes
-        fig_mcubes = ff.create_trisurf(
-            x=x,
-            y=y,
-            z=z,
-            show_colorbar=True,
-            plot_edges=True,
-            simplices=simplices,
-        )
+            # Add plot for marching cubes
+            fig_mcubes = ff.create_trisurf(
+                x=x,
+                y=y,
+                z=z,
+                show_colorbar=True,
+                plot_edges=True,
+                simplices=simplices,
+            )
 
-        fig.add_trace(fig_mcubes.data[0], row=1, col=4)
+            fig.add_trace(fig_mcubes.data[0], row=1, col=4)
 
     def plot_hits_surface(self, X, fig):
         """
@@ -557,7 +559,7 @@ class BHM_PLOTTER():
         )
 
         # calc error - possible only when Xq_mv = X
-        #if self.args.query_dist[0] <= 0 and self.args.query_dist[1] <= 0 and self.args.query_dist[2] <= 0:
+        #if self.self.args.query_dist[0] <= 0 and self.self.args.query_dist[1] <= 0 and self.self.args.query_dist[2] <= 0:
         #    print(" RMSE:", torch.sqrt(torch.mean((y_vy - mean_y)**2)).item())
 
         # filter by surface threshold
@@ -629,7 +631,7 @@ class BHM_PLOTTER():
         )
 
         # calc error - possible only when Xq_mv = X
-        #if self.args.query_dist[0] <= 0 and self.args.query_dist[1] <= 0 and self.args.query_dist[2] <= 0:
+        #if self.self.args.query_dist[0] <= 0 and self.self.args.query_dist[1] <= 0 and self.self.args.query_dist[2] <= 0:
         #    print(" RMSE:", torch.sqrt(torch.mean((y_vy - mean_y)**2)).item())
 
         # filter by surface threshold
