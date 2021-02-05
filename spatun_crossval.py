@@ -154,6 +154,7 @@ if __name__ == '__main__':
     parser.add_argument('--dataset_path', type=str, help='Path to dataset')
     parser.add_argument('--area_min', nargs=3, type=int, help='X Y Z minimum coordinates in bounding box (3 values)')
     parser.add_argument('--area_max', nargs=3, type=int, help='X Y Z maximum coordinates in bounding box (3 values)')
+    parser.add_argument('--hinge-type', type=str, help='Hinge point type (grid or hit_locations)')
     parser.add_argument('--hinge_dist', nargs=3, type=int, help='X Y Z hinge point resolution (3 values)')
     parser.add_argument('--kernel_type', type=str, help='Type of RBF kernel: Vanilla RBF(), Convolution (conv), Wasserstein (wass)')
     parser.add_argument('--gamma', nargs='+', type=float, help='X Y Z Gamma (1-3 values)')
