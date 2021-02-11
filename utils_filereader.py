@@ -16,25 +16,26 @@ def format_config(args):
     fn_train = os.path.abspath(args.dataset_path)
 
     #Calculate area_min and area_max if none provided (default)
-    if args.area_min == args.area_max:
+    if args.area_min==args.area_max:
         data = pd.read_csv(fn_train+'.csv').to_numpy() #['', 't', 'X', 'Y', 'Z', 'occupancy', 'sig_x', 'sig_y', 'sig_z']
-        args.area_min = [np.amin(data, axis=0)[2], np.amin(data, axis=0)[3], np.amin(data, axis=0)[4]]
-        args.area_max = [np.amax(data, axis=0)[2], np.amax(data, axis=0)[3], np.amax(data, axis=0)[4]]
+        args.area_min = [np.amin(data, axis=0)[2].item(), np.amin(data, axis=0)[3].item(), np.amin(data, axis=0)[4].item()]
+        args.area_max = [np.amax(data, axis=0)[2].item(), np.amax(data, axis=0)[3].item(), np.amax(data, axis=0)[4].item()]
+        #Increase min and max values by half the range in each direction
+        for i in range(3):
+            delta = (args.area_max[i] - args.area_min[i])*0.5
+            args.area_min[i] -= delta
+            args.area_max[i] += delta
 
-    # default parameter to increase min and max bounds of cell_max_min
-    ranges = [args.area_max[0] - args.area_min[0], args.area_max[1] - args.area_min[1], args.area_max[2] - args.area_min[2]]
-    max_range = max(ranges)
-    delta = (max_range)*0.5
-
+    # default parameter to shrink min and max bounds of cell_max_min
+    cell_max_min_delta = (args.area_max[0] - args.area_min[0])*0.03
     cell_max_min = [
-        args.area_min[0] - delta,
-        args.area_max[0] + delta,
-        args.area_min[1] - delta,
-        args.area_max[1] + delta,
-        args.area_min[2] - delta,
-        args.area_max[2] + delta
+        args.area_min[0] + cell_max_min_delta,
+        args.area_max[0] - cell_max_min_delta,
+        args.area_min[1] + cell_max_min_delta,
+        args.area_max[1] - cell_max_min_delta,
+        args.area_min[2] + cell_max_min_delta,
+        args.area_max[2] - cell_max_min_delta
     ]
-
 
     cell_resolution = (
         args.hinge_dist[0],
