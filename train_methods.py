@@ -110,6 +110,8 @@ def train_occupancy(args, partitions, cell_resolution, X, y, sigma, framei):
     num_segments = len(partitions)
     if args.hinge_type == "hit_locations":
         grid = make_hinge_pts(X, y)
+    elif args.hinge_type == "data_locations":
+        grid = X
     else:
         grid = None
     for i, segi in enumerate(partitions):
