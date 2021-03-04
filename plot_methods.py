@@ -14,6 +14,7 @@ import time
 import torch
 import numpy as np
 from skimage import measure
+from sklearn.metrics.pairwise import euclidean_distances
 import utils_filereader
 
 from bhmtorch_cpu import BHM3D_PYTORCH
@@ -188,7 +189,15 @@ class BHM_PLOTTER():
             col=3
         )
 
-    def plot_marching_cubes(self, toPlot, fig, iframe):
+    def plot_marching_cubes(self, toPlot, fig, iframe, X):
+        """
+        Plot marching cube: Plots reconstructed surface from training and querying
+
+        @param toPlot: array of (Xq, yq, vars) (3D location and occupancy prediction)
+        @param fig: plotly fig
+        @param iframe: ith frame
+        @param X: 3D coordinates for each lidar observation
+        """
         if self.args.query_dist[0] > 0 and self.args.query_dist[1] > 0 and self.args.query_dist[2] > 0:
             #if all query-distances are positive, then we have no slices and can proceed with marching cubes
             yqs = torch.ones(1)
@@ -196,6 +205,10 @@ class BHM_PLOTTER():
                 if self.surface_threshold[0] > 0:
                     ploti = self.filter_predictions(ploti)
                 Xq, yq = ploti[0], ploti[1]
+                #if using grid, then filter out points that are far away from hit locations
+                if self.args.hinge_type == "grid":
+                    mask = np.sum(euclidean_distances(Xq, X) <= 0.2, axis=1) <= 1
+                    yq[mask] = yq.min()
                 if Xq.shape[0] <= 1: continue
                 yqs = torch.cat((yqs, yq), dim=0)
             yqs = yqs[1:]
@@ -388,7 +401,7 @@ class BHM_PLOTTER():
         )
         self.plot_lidar_hits(X, y, fig)
         self.plot_predictions(toPlot, fig, i)
-        self.plot_marching_cubes(toPlot, fig, i)
+        self.plot_marching_cubes(toPlot, fig, i, X)
         camera = dict(
             eye=dict(x=3.2, y=-3.2, z=3.2)
         )
