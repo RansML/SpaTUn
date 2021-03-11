@@ -26,15 +26,13 @@ def format_config(args):
             args.area_min[i] -= delta
             args.area_max[i] += delta
 
-    # default parameter to shrink min and max bounds of cell_max_min
-    cell_max_min_delta = (args.area_max[0] - args.area_min[0])*0.03
     cell_max_min = [
-        args.area_min[0] + cell_max_min_delta,
-        args.area_max[0] - cell_max_min_delta,
-        args.area_min[1] + cell_max_min_delta,
-        args.area_max[1] - cell_max_min_delta,
-        args.area_min[2] + cell_max_min_delta,
-        args.area_max[2] - cell_max_min_delta
+        args.area_min[0],
+        args.area_max[0],
+        args.area_min[1],
+        args.area_max[1],
+        args.area_min[2],
+        args.area_max[2]
     ]
 
     cell_resolution = (

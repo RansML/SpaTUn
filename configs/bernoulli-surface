@@ -6,18 +6,18 @@
 
   "model_type": "occupancy",
   "likelihood_type": "gaussian",
-  "dataset_path": "./datasets/bernoulli-surface/sphere-with-hole",
-  "hinge_type": "grid",
-  "hinge_dist": [0.2,0.2,0.2],
-  "area_min" : [-1, -1, -1],
-  "area_max" : [1, 1, 1],
+  "dataset_path": "./datasets/bernoulli-surface/coral_normalized",
+  "hinge_type": "hit_locations",
+  "area_min" : [-1.25, -1.25, -1.25],
+  "area_max" : [1.25, 1.25, 1.25],
+  "hinge_dist": [0.15,0.15,0.15],
   "kernel_type": "rbf",
-  "gamma": [25],
+  "gamma": [500],
   "num_partitions": [1,1,1],
   "partition_bleed": 0.25,
   "save_model_path": "tmp",
 
-  "query_dist": [0.1,0.1, -0.1, 0.4],
+  "query_dist": [0.05, -0.05, 0.05, 0],
   "query_blocks": 1,
   "variance_only": false,
   "eval_path": "",
@@ -26,5 +26,5 @@
 
   "occupancy_plot_type": "volumetric",
   "plot_title": "bernoulli-surface",
-  "surface_threshold": [-0.3, 0.3]
+  "surface_threshold": [-0.5, 0.5]
 }

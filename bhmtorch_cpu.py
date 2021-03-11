@@ -45,6 +45,11 @@ class BHM3D_PYTORCH():
         self.mu = mu
         self.sig = sig
 
+    def append_values(self, add_X, add_mu, add_sig):
+        self.grid = torch.cat((self.grid, add_X), dim = 0)
+        self.mu = torch.cat((self.mu, add_mu), dim = 0)
+        self.sig = torch.cat((self.sig, add_sig), dim = 0)
+
     def updateEpsilon(self, epsilon):
         self.epsilon = epsilon
 

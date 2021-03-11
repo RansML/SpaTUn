@@ -5,6 +5,7 @@ import pandas as pd
 import time
 import torch
 import numpy as np
+from sklearn.metrics.pairwise import euclidean_distances
 
 from bhmtorch_cpu import BHM3D_PYTORCH, BHM_REGRESSION_PYTORCH, BHM_VELOCITY_PYTORCH
 from utils_filereader import read_frame_velocity
@@ -106,8 +107,24 @@ def query_occupancy(args, cell_max_min, partitions, X, y, framei):
     """
     totalTime = 0
     occupancyPlot = []
+    bhm_mdl, train_time = load_mdl(args, 'occupancy/{}_f{}_p{}'.format(args.save_model_path, framei, 0), 'BHM3D_PYTORCH')
+    #If not using grid, associate additional zero-mean large-variance points far away from data points to bhm_mdl to correct variance
+    if args.hinge_type != "grid":
+        x_x, y_y, z_z = torch.meshgrid(
+            torch.arange(cell_max_min[0]-abs(3*args.query_dist[0]), cell_max_min[1]+abs(3*args.query_dist[0]), abs(args.query_dist[0])),
+            torch.arange(cell_max_min[2]-abs(3*args.query_dist[1]), cell_max_min[3]+abs(3*args.query_dist[1]), abs(args.query_dist[1])),
+            torch.arange(cell_max_min[4]-abs(3*args.query_dist[2]), cell_max_min[5]+abs(3*args.query_dist[2]), abs(args.query_dist[2]))
+        )
+        add_X = torch.stack([x_x.flatten(), y_y.flatten(), z_z.flatten()], dim=1)
+        mask = np.sum(euclidean_distances(add_X, X) <= 0.1, axis=1) <= 1
+        add_X = add_X[mask, :]
+
+        add_mu = torch.zeros(add_X.shape[0])
+        add_var = torch.ones(add_X.shape[0])
+
+        bhm_mdl.append_values(add_X, add_mu, add_var)
+
     if args.query_dist[0] <= 0 or args.query_dist[1] <= 0 or args.query_dist[2] <= 0:
-        bhm_mdl, train_time = load_mdl(args, 'occupancy/{}_f{}_p{}'.format(args.save_model_path, framei, 0), 'BHM3D_PYTORCH')
         #if at least one q_res is non-positive, then
         if args.query_dist[0] <= 0: #x-slice
             print(" Query data is x={} slice ".format(args.query_dist[3]))
@@ -181,7 +198,6 @@ def query_occupancy(args, cell_max_min, partitions, X, y, framei):
         num_segments = len(partitions)
         for i, segi in enumerate(partitions):
             print(' Querying segment {} of {}...'.format(i+1, num_segments))
-            bhm_mdl, train_time = load_mdl(args, 'occupancy/{}_f{}_p{}'.format(args.save_model_path, framei, i), 'BHM3D_PYTORCH')
             # query the model
             xx, yy, zz = torch.meshgrid(
                 torch.arange(segi[0], segi[1], args.query_dist[0]),
