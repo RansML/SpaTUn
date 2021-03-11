@@ -111,9 +111,9 @@ def query_occupancy(args, cell_max_min, partitions, X, y, framei):
     #If not using grid, associate additional zero-mean large-variance points far away from data points to bhm_mdl to correct variance
     if args.hinge_type != "grid":
         x_x, y_y, z_z = torch.meshgrid(
-            torch.arange(cell_max_min[0]-abs(3*args.query_dist[0]), cell_max_min[1]+abs(3*args.query_dist[0]), abs(args.query_dist[0])),
-            torch.arange(cell_max_min[2]-abs(3*args.query_dist[1]), cell_max_min[3]+abs(3*args.query_dist[1]), abs(args.query_dist[1])),
-            torch.arange(cell_max_min[4]-abs(3*args.query_dist[2]), cell_max_min[5]+abs(3*args.query_dist[2]), abs(args.query_dist[2]))
+            torch.arange(cell_max_min[0]-abs(3*args.hinge_dist[0]), cell_max_min[1]+abs(3*args.hinge_dist[0]), abs(args.hinge_dist[0])),
+            torch.arange(cell_max_min[2]-abs(3*args.hinge_dist[1]), cell_max_min[3]+abs(3*args.hinge_dist[1]), abs(args.hinge_dist[1])),
+            torch.arange(cell_max_min[4]-abs(3*args.hinge_dist[2]), cell_max_min[5]+abs(3*args.hinge_dist[2]), abs(args.hinge_dist[2]))
         )
         add_X = torch.stack([x_x.flatten(), y_y.flatten(), z_z.flatten()], dim=1)
         mask = np.sum(euclidean_distances(add_X, X) <= 0.1, axis=1) <= 1
@@ -191,7 +191,7 @@ def query_occupancy(args, cell_max_min, partitions, X, y, framei):
             option = 'Z slice at '.format(args.query_dist[3])
 
         time1 = time.time()
-        yq, var = bhm_mdl.predict(Xq)
+        yq, var = bhm_mdl.predictSampling(Xq, nSamples=50)
         totalTime += time.time()-time1
         occupancyPlot.append((Xq,yq,var))
     else:
@@ -206,7 +206,7 @@ def query_occupancy(args, cell_max_min, partitions, X, y, framei):
             )
             Xq = torch.stack([xx.flatten(), yy.flatten(), zz.flatten()], dim=1)
             time1 = time.time()
-            yq, var = bhm_mdl.predict(Xq)
+            yq, var = bhm_mdl.predictSampling(Xq, nSamples=50)
             totalTime += time.time()-time1
             occupancyPlot.append((Xq,yq,var))
         option = 'grid'
