@@ -6,8 +6,11 @@ import math
 import numpy as np
 import torch
 import statsmodels.api as sm
+from sklearn.metrics.pairwise import euclidean_distances
+import matplotlib.pyplot as pl
 
 from kernel import rbf_kernel_conv, rbf_kernel_wasserstein, rbf_kernel
+
 
 
 class BHM3D_PYTORCH():
@@ -133,17 +136,46 @@ class BHM3D_PYTORCH():
             self.epsilon = torch.sqrt(torch.sum((X**2)*self.sig, dim=1) + (X.mm(self.mu.reshape(-1, 1))**2).squeeze())
         return self.mu, self.sig
 
-    def predict(self, Xq):
+    def predict(self, Xq, query_blocks = -1):
         """
         :param Xq: raw inquery points
-        :return: mean occupancy (Laplace approximation)
+        :param query_blocks: number of query blocks for calculating mean and variance
+        :return: mean occupancy (Laplace approximation), variance
         """
-        Xq = self.__sparse_features(Xq, None, self.rbf_kernel_type)
+        if query_blocks <= 0:
+            Xq = self.__sparse_features(Xq, None, self.rbf_kernel_type)
+            mu_a = Xq.mm(self.mu.reshape(-1, 1)).squeeze()
+            sig2_inv_a = torch.sum((Xq ** 2) * self.sig, dim=1)
+        else:
+            features = self.__sparse_features(Xq, None, self.rbf_kernel_type)
+            print(" query_blocks:", query_blocks)
+            step_size = Xq.shape[0] // query_blocks
+            if Xq.shape[0] % step_size != 0:
+                query_blocks += 1
 
-        mu_a = Xq.mm(self.mu.reshape(-1, 1)).squeeze()
-        sig2_inv_a = torch.sum((Xq ** 2) * self.sig, dim=1)
+            mu_a = torch.zeros(Xq.shape[0],1)
+            sig2_inv_a = torch.zeros(Xq.shape[0],1)
+
+            for i in range(query_blocks):
+                start = i * step_size
+                end = start + step_size
+                if end > Xq.shape[0]:
+                    end = Xq.shape[0]
+
+                print("step", i, start, end)
+                #Get mask of elements near Xq[start:end]
+                # near_mask should include any index in Xq with at least 1 member Xq[start:end] within 0.1 distance, and therefore should have more indices than Xq[start:end]
+                near_mask = np.sum(euclidean_distances(Xq, Xq[start:end]) <= 0.3, axis=1) >= 1
+                # filter contains indices in near_mask that were in the original Xq[start:end]
+                filter = (Xq[near_mask, None] == Xq[start:end]).all(-1).any(-1)
+                #Calculate mu_a and sig2_inv_a with extra hinge points from near_mask, then only concatenate those from start:end
+                mu_a[start:end] = features[near_mask].mm(self.mu.reshape(-1, 1))[filter]
+                sig2_inv_a[start:end] = torch.sum((features[near_mask] ** 2) * self.sig, dim=1).reshape(-1,1)[filter]
+
+            mu_a = mu_a.squeeze()
+            sig2_inv_a = sig2_inv_a.squeeze()
+
         k = 1.0 / torch.sqrt(1 + math.pi * sig2_inv_a / 8)
-
         return torch.sigmoid(k*mu_a), sig2_inv_a
 
     def predictSampling(self, Xq, nSamples=50):

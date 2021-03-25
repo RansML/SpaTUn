@@ -99,6 +99,7 @@ class BHM_PLOTTER():
         """
         Xqs = torch.zeros((1, 3))
         yqs = torch.ones(1)
+
         vars = torch.zeros(1)
         for ploti in toPlot:
             var = ploti[2]
@@ -205,10 +206,9 @@ class BHM_PLOTTER():
                 if self.surface_threshold[0] > 0:
                     ploti = self.filter_predictions(ploti)
                 Xq, yq = ploti[0], ploti[1]
-                #if using grid, then filter out points that are far away from hit locations
-                if self.args.hinge_type == "grid":
-                    mask = np.sum(euclidean_distances(Xq, X) <= 0.2, axis=1) <= 1
-                    yq[mask] = yq.min()
+                #filter out points that are far away from hit locations
+                mask = np.sum(euclidean_distances(Xq, X) <= 0.2, axis=1) <= 1
+                yq[mask] = yq.min()
                 if Xq.shape[0] <= 1: continue
                 yqs = torch.cat((yqs, yq), dim=0)
             yqs = yqs[1:]
