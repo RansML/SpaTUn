@@ -115,15 +115,19 @@ def query_occupancy(args, cell_max_min, partitions, X, y, framei):
             torch.arange(cell_max_min[2]-abs(3*args.hinge_dist[1]), cell_max_min[3]+abs(3*args.hinge_dist[1]), abs(args.hinge_dist[1]/2)),
             torch.arange(cell_max_min[4]-abs(3*args.hinge_dist[2]), cell_max_min[5]+abs(3*args.hinge_dist[2]), abs(args.hinge_dist[2]/2))
         )
-        add_X = torch.stack([x_x.flatten(), y_y.flatten(), z_z.flatten()], dim=1)
-        mask = np.sum(euclidean_distances(add_X, X) <= 0.1, axis=1) <= 1
-        add_X = add_X[mask, :]
+        additional_X = torch.stack([x_x.flatten(), y_y.flatten(), z_z.flatten()], dim=1)
 
-        add_mu = torch.zeros(add_X.shape[0])
-        add_var = torch.ones(add_X.shape[0])*100000
-        print("Adding "+ str(add_X.shape[0]) + "points")
+        #Get points far away from data points or hit points
+        mask = np.sum(euclidean_distances(additional_X, X) <= 0.1, axis=1) <= 1
 
-        bhm_mdl.append_values(add_X, add_mu, add_var)
+        #Create zero-mean large-variance point for each point in additional_X
+        additional_X = additional_X[mask, :]
+        additional_mu = torch.zeros(additional_X.shape[0])
+        additional_var = torch.ones(additional_X.shape[0])*100000
+
+        #Append additional points to bhm_mdl
+        print("Adding "+ str(additional_X.shape[0]) + "points")
+        bhm_mdl.append_values(additional_X, additional_mu, additional_var)
 
     if args.query_dist[0] <= 0 or args.query_dist[1] <= 0 or args.query_dist[2] <= 0:
         #if at least one q_res is non-positive, then
@@ -192,7 +196,7 @@ def query_occupancy(args, cell_max_min, partitions, X, y, framei):
             option = 'Z slice at '.format(args.query_dist[3])
 
         time1 = time.time()
-        yq, var = bhm_mdl.predictSampling(Xq, nSamples=50)
+        yq, var = bhm_mdl.predictSampling(Xq, nSamples=50, query_blocks=args.query_blocks)
         totalTime += time.time()-time1
         occupancyPlot.append((Xq,yq,var))
     else:
@@ -207,7 +211,7 @@ def query_occupancy(args, cell_max_min, partitions, X, y, framei):
             )
             Xq = torch.stack([xx.flatten(), yy.flatten(), zz.flatten()], dim=1)
             time1 = time.time()
-            yq, var = bhm_mdl.predict(Xq, query_blocks=32)
+            yq, var = bhm_mdl.predictSampling(Xq, nSamples=50, query_blocks=args.query_blocks)
             totalTime += time.time()-time1
             occupancyPlot.append((Xq,yq,var))
         option = 'grid'

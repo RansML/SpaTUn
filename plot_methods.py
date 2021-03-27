@@ -206,6 +206,7 @@ class BHM_PLOTTER():
                 if self.surface_threshold[0] > 0:
                     ploti = self.filter_predictions(ploti)
                 Xq, yq = ploti[0], ploti[1]
+
                 #filter out points that are far away from hit locations
                 mask = np.sum(euclidean_distances(Xq, X) <= 0.2, axis=1) <= 1
                 yq[mask] = yq.min()

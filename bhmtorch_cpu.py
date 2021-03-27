@@ -178,23 +178,40 @@ class BHM3D_PYTORCH():
         k = 1.0 / torch.sqrt(1 + math.pi * sig2_inv_a / 8)
         return torch.sigmoid(k*mu_a), sig2_inv_a
 
-    def predictSampling(self, Xq, nSamples=50):
+    def predictSampling(self, Xq, nSamples=50, query_blocks = -1):
         """
         :param Xq: raw inquery points
         :param nSamples: number of samples to take the average over
+        :param query_blocks: number of query blocks for calculating sample mean and standard deviation
         :return: sample mean and standard deviation of occupancy
         """
         Xq = self.__sparse_features(Xq, None, self.rbf_kernel_type)
-
         qw = torch.distributions.MultivariateNormal(self.mu, torch.diag(self.sig))
         w = qw.sample((nSamples,)).t()
 
-        mu_a = Xq.mm(w).squeeze()
-        probs = torch.sigmoid(mu_a)
+        if query_blocks <= 0:
+            mu_a = Xq.mm(w)
+        else:
+            print(" query_blocks:", query_blocks)
+            step_size = Xq.shape[0] // query_blocks
+            if Xq.shape[0] % step_size != 0:
+                query_blocks += 1
 
+            mu_a = torch.zeros(Xq.shape[0],nSamples)
+
+            for i in range(query_blocks):
+                start = i * step_size
+                end = start + step_size
+                if end > Xq.shape[0]:
+                    end = Xq.shape[0]
+
+                print("step", i, start, end)
+                mu_a[start:end] = Xq[start:end].mm(w)
+
+        mu_a = mu_a.squeeze()
+        probs = torch.sigmoid(mu_a)
         mean = torch.mean(probs, dim=1).squeeze()
         std = torch.std(probs, dim=1).squeeze()
-
         return mean, std
 
 
