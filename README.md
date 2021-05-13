@@ -1,7 +1,5 @@
 # SpaTUn: Spatio-Temporal Uncertainty
 ![SpaTUn](./SpaTUn.png?raw=true "SpaTUn")
-![Alt text](./plots/Regression_sample.png?raw=true "Regression Sample")
-![Alt text](./plots/Occupancy_sample.png?raw=true "Classification Sample")
 
 Description.
 
@@ -12,6 +10,8 @@ Description.
 | scalarfield3d   | Gaussian, Gamma | Position maps, Velocity maps |
 | vetorfield3d    | Gaussian | Velocity maps, acceleration maps        |
 | surface3d       | Bernoulli | 3D surfaces            |
+
+![surf](./surf.png?raw=true "surf")
 
 ### Prerequisites
 
